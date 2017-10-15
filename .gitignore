@@ -1,0 +1,10 @@
+*.o
+*.pyc
+*.gcov 
+*.gcno 
+*.gcda 
+*.bin 
+*.out
+tiburoncin
+dump.dtos 
+dump.stod

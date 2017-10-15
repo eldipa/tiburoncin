@@ -1,0 +1,152 @@
+We want to test what happen if the buffer is too short
+or it is full. We expect that the sender will block waiting
+for tiburoncin to flush its buffer to make more room for the
+incoming data.
+
+Buf sizes (src->dst : dst->src): (1, 2048)
+
+Src's point of view
+> AAA
+: BBB
+
+
+Dst's point of view
+: AAA
+> BBB
+
+
+Tiburoncin's point of view
+Connecting to dst <addr>...
+Waiting for a connection from src <addr>...
+Allocating buffers: 1 and 2048 bytes...
+src -> dst sent 1 bytes
+00000000  41                                                |A               |
+dst is 1 bytes behind
+dst is in sync
+src -> dst sent 1 bytes
+00000001     41                                             | A              |
+dst is 1 bytes behind
+dst is in sync
+src -> dst sent 1 bytes
+00000002        41                                          |  A             |
+dst is 1 bytes behind
+dst is in sync
+src -> dst sent 1 bytes
+00000003           0a                                       |   .            |
+dst is 1 bytes behind
+dst is in sync
+dst -> src sent 4 bytes
+00000000  42 42 42 0a                                       |BBB.            |
+src is 4 bytes behind
+src is in sync
+
+Tiburoncin's return code: 0
+
+We want to test what happen if the buffer is too short
+or it is full. We expect that the sender will block waiting
+for tiburoncin to flush its buffer to make more room for the
+incoming data.
+
+Buf sizes (src->dst : dst->src): (2, 2048)
+
+Src's point of view
+> AAA
+: BBB
+
+
+Dst's point of view
+: AAA
+> BBB
+
+
+Tiburoncin's point of view
+Connecting to dst <addr>...
+Waiting for a connection from src <addr>...
+Allocating buffers: 2 and 2048 bytes...
+src -> dst sent 2 bytes
+00000000  41 41                                             |AA              |
+dst is 2 bytes behind
+dst is in sync
+src -> dst sent 2 bytes
+00000002        41 0a                                       |  A.            |
+dst is 2 bytes behind
+dst is in sync
+dst -> src sent 4 bytes
+00000000  42 42 42 0a                                       |BBB.            |
+src is 4 bytes behind
+src is in sync
+
+Tiburoncin's return code: 0
+
+We want to test what happen if the buffer is too short
+or it is full. We expect that the sender will block waiting
+for tiburoncin to flush its buffer to make more room for the
+incoming data.
+
+Buf sizes (src->dst : dst->src): (4, 2048)
+
+Src's point of view
+> AAA
+: BBB
+
+
+Dst's point of view
+: AAA
+> BBB
+
+
+Tiburoncin's point of view
+Connecting to dst <addr>...
+Waiting for a connection from src <addr>...
+Allocating buffers: 4 and 2048 bytes...
+src -> dst sent 4 bytes
+00000000  41 41 41 0a                                       |AAA.            |
+dst is 4 bytes behind
+dst is in sync
+dst -> src sent 4 bytes
+00000000  42 42 42 0a                                       |BBB.            |
+src is 4 bytes behind
+src is in sync
+
+Tiburoncin's return code: 0
+
+We want to test what happen if the buffer is too short
+or it is full. We expect that the sender will block waiting
+for tiburoncin to flush its buffer to make more room for the
+incoming data.
+
+Buf sizes (src->dst : dst->src): 3
+
+Src's point of view
+> AAA
+: BBB
+
+
+Dst's point of view
+: AAA
+> BBB
+
+
+Tiburoncin's point of view
+Connecting to dst <addr>...
+Waiting for a connection from src <addr>...
+Allocating buffers: 3 and 3 bytes...
+src -> dst sent 3 bytes
+00000000  41 41 41                                          |AAA             |
+dst is 3 bytes behind
+dst is in sync
+src -> dst sent 1 bytes
+00000003           0a                                       |   .            |
+dst is 1 bytes behind
+dst is in sync
+dst -> src sent 3 bytes
+00000000  42 42 42                                          |BBB             |
+src is 3 bytes behind
+src is in sync
+dst -> src sent 1 bytes
+00000003           0a                                       |   .            |
+src is 1 bytes behind
+src is in sync
+
+Tiburoncin's return code: 0
+

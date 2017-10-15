@@ -1,0 +1,56 @@
+The idea is to send some data back and forward
+and check if all the data is forwarded by tiburoncin
+and the correct hexdump is shown for the data sent.
+
+Src's point of view
+> hello
+: hi there!
+: how are you?
+> very good, thanks for asking
+: good to hear that, bye
+> bye!
+
+
+Dst's point of view
+: hello
+> hi there!
+> how are you?
+: very good, thanks for asking
+> good to hear that, bye
+: bye!
+
+
+Tiburoncin's point of view
+Connecting to dst <addr>...
+Waiting for a connection from src <addr>...
+Allocating buffers: 2048 and 2048 bytes...
+src -> dst sent 6 bytes
+00000000  68 65 6c 6c 6f 0a                                 |hello.          |
+dst is 6 bytes behind
+dst is in sync
+dst -> src sent 10 bytes
+00000000  68 69 20 74 68 65 72 65  21 0a                    |hi there!.      |
+src is 10 bytes behind
+src is in sync
+dst -> src sent 13 bytes
+0000000a                                 68 6f 77 20 61 72  |          how ar|
+00000010  65 20 79 6f 75 3f 0a                              |e you?.         |
+src is 13 bytes behind
+src is in sync
+src -> dst sent 29 bytes
+00000006                    76 65  72 79 20 67 6f 6f 64 2c  |      very good,|
+00000010  20 74 68 61 6e 6b 73 20  66 6f 72 20 61 73 6b 69  | thanks for aski|
+00000020  6e 67 0a                                          |ng.             |
+dst is 29 bytes behind
+dst is in sync
+dst -> src sent 23 bytes
+00000017                       67  6f 6f 64 20 74 6f 20 68  |       good to h|
+00000020  65 61 72 20 74 68 61 74  2c 20 62 79 65 0a        |ear that, bye.  |
+src is 23 bytes behind
+src is in sync
+src -> dst sent 5 bytes
+00000023           62 79 65 21 0a                           |   bye!.        |
+dst is 5 bytes behind
+dst is in sync
+
+Tiburoncin's return code: 0

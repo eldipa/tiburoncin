@@ -1,0 +1,112 @@
+Tiburoncin's return code: 0
+src to dst dump:
+4141414141414141414141410a414141
+4141414141414141410a414141414141
+4141414141410a414141414141414141
+4141410a414141414141414141414141
+0a4141414141414141414141410a4141
+414141414141414141410a4141414141
+414141414141410a4141414141414141
+414141410a4141414141414141414141
+410a
+dst to src dump:
+424242424242420a424242424242420a
+424242424242420a424242424242420a
+424242424242420a424242424242420a
+424242424242420a424242424242420a
+424242424242420a424242424242420a
+
+
+Tiburoncin's point of view
+Connecting to dst <addr>...
+Waiting for a connection from src <addr>...
+Allocating buffers: 2048 and 2048 bytes...
+src -> dst sent 13 bytes
+00000000  41 41 41 41 41 41 41 41  41 41 41 41 0a           |AAAAAAAAAAAA.   |
+dst is 13 bytes behind
+dst is in sync
+dst -> src sent 8 bytes
+00000000  42 42 42 42 42 42 42 0a                           |BBBBBBB.        |
+src is 8 bytes behind
+src is in sync
+src -> dst sent 13 bytes
+0000000d                                          41 41 41  |             AAA|
+00000010  41 41 41 41 41 41 41 41  41 0a                    |AAAAAAAAA.      |
+dst is 13 bytes behind
+dst is in sync
+dst -> src sent 8 bytes
+00000008                           42 42 42 42 42 42 42 0a  |        BBBBBBB.|
+src is 8 bytes behind
+src is in sync
+src -> dst sent 13 bytes
+0000001a                                 41 41 41 41 41 41  |          AAAAAA|
+00000020  41 41 41 41 41 41 0a                              |AAAAAA.         |
+dst is 13 bytes behind
+dst is in sync
+dst -> src sent 8 bytes
+00000010  42 42 42 42 42 42 42 0a                           |BBBBBBB.        |
+src is 8 bytes behind
+src is in sync
+src -> dst sent 13 bytes
+00000027                       41  41 41 41 41 41 41 41 41  |       AAAAAAAAA|
+00000030  41 41 41 0a                                       |AAA.            |
+dst is 13 bytes behind
+dst is in sync
+dst -> src sent 8 bytes
+00000018                           42 42 42 42 42 42 42 0a  |        BBBBBBB.|
+src is 8 bytes behind
+src is in sync
+src -> dst sent 13 bytes
+00000034              41 41 41 41  41 41 41 41 41 41 41 41  |    AAAAAAAAAAAA|
+00000040  0a                                                |.               |
+dst is 13 bytes behind
+dst is in sync
+dst -> src sent 8 bytes
+00000020  42 42 42 42 42 42 42 0a                           |BBBBBBB.        |
+src is 8 bytes behind
+src is in sync
+src -> dst sent 13 bytes
+00000041     41 41 41 41 41 41 41  41 41 41 41 41 0a        | AAAAAAAAAAAA.  |
+dst is 13 bytes behind
+dst is in sync
+dst -> src sent 8 bytes
+00000028                           42 42 42 42 42 42 42 0a  |        BBBBBBB.|
+src is 8 bytes behind
+src is in sync
+src -> dst sent 13 bytes
+0000004e                                             41 41  |              AA|
+00000050  41 41 41 41 41 41 41 41  41 41 0a                 |AAAAAAAAAA.     |
+dst is 13 bytes behind
+dst is in sync
+dst -> src sent 8 bytes
+00000030  42 42 42 42 42 42 42 0a                           |BBBBBBB.        |
+src is 8 bytes behind
+src is in sync
+src -> dst sent 13 bytes
+0000005b                                    41 41 41 41 41  |           AAAAA|
+00000060  41 41 41 41 41 41 41 0a                           |AAAAAAA.        |
+dst is 13 bytes behind
+dst is in sync
+dst -> src sent 8 bytes
+00000038                           42 42 42 42 42 42 42 0a  |        BBBBBBB.|
+src is 8 bytes behind
+src is in sync
+src -> dst sent 13 bytes
+00000068                           41 41 41 41 41 41 41 41  |        AAAAAAAA|
+00000070  41 41 41 41 0a                                    |AAAA.           |
+dst is 13 bytes behind
+dst is in sync
+dst -> src sent 8 bytes
+00000040  42 42 42 42 42 42 42 0a                           |BBBBBBB.        |
+src is 8 bytes behind
+src is in sync
+src -> dst sent 13 bytes
+00000075                 41 41 41  41 41 41 41 41 41 41 41  |     AAAAAAAAAAA|
+00000080  41 0a                                             |A.              |
+dst is 13 bytes behind
+dst is in sync
+dst -> src sent 8 bytes
+00000048                           42 42 42 42 42 42 42 0a  |        BBBBBBB.|
+src is 8 bytes behind
+src is in sync
+
