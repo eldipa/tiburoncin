@@ -41,7 +41,7 @@ The following diagram depicts what's going on:
 +-----------------+      
 ```
 
-# Capture example
+### Capture example
 
 ```
 Connecting to dst 127.0.0.1:8082...
@@ -62,7 +62,7 @@ src is in sync
 dst is in sync
 ```
 
-## Help
+### Help
 
 ```
 ./tiburoncin -s <src> -d <dst> [-b <bsz>] [-z <bsz>] [-o]
@@ -101,7 +101,7 @@ You will need `make` and `gcc` with support for `c99`. Then just run:
 make compile
 ```
 
-## Run the tests
+### Run the tests
 
 ```shell
 make test
