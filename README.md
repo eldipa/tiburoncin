@@ -1,7 +1,7 @@
 # tiburoncin
 
 Small man in the middle tool to inspect the traffic between two endpoints.
-Mostly to be use for students wanting to know what data is flowing in a TCP channel.
+Mostly to be used for students wanting to know what data is flowing in a TCP channel.
 
 ## Usage
 
@@ -110,5 +110,5 @@ make test
 ## How to contribute
 
 Make a fork and start to hack. 
-Keep your code as clean as possible and following the same coding style that the rest of the code and make small commits.
+Keep your code as clean as possible and following the same coding style that the rest of the code and making small commits.
 When you finish, do a Pull Request.
