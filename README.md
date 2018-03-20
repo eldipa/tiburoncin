@@ -104,7 +104,7 @@ make compile
 ### Run the tests
 
 ```shell
-make _run_test
+make test
 ```
 
 ## How to contribute

@@ -9,7 +9,7 @@ test: compile
 
 memcheck: compile
 	mv tiburoncin tiburoncin.bin
-	@echo '#!/bin/bash \n valgrind --quiet --leak-check=summary --log-file=valgrind-%p.out ./tiburoncin.bin $$@' > tiburoncin
+	@echo '#!/bin/bash \n valgrind --quiet --leak-check=summary --log-file=valgrind-%p.out ./tiburoncin.bin $$@' > tiburoncin 2>&1
 	chmod u+x tiburoncin
 	make _run_test
 	mv tiburoncin.bin tiburoncin
