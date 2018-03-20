@@ -9,9 +9,9 @@ def test():
 
     dst = spawn_netcat(dst_port, listen_mode=True)
     time.sleep(0.001)
-    
+
     tib = spawn_tiburoncin(src_port, dst_port)
-    
+
     src = spawn_netcat(src_port, listen_mode=False)
     time.sleep(0.001)
 
@@ -19,13 +19,13 @@ def test():
 
     send(dst, src, tib, "hi there!\n")
     send(dst, src, tib, "how are you?\n")
-    
+
     send(src, dst, tib, "very good, thanks for asking\n")
-    
+
     send(dst, src, tib, "good to hear that, bye\n")
-    
+
     send(src, dst, tib, "bye!\n")
-    
+
     dst.stdin.close()
     src.stdin.close()
 

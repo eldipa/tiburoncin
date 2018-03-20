@@ -6,9 +6,9 @@ def test():
 
     dst = spawn_netcat(dst_port, listen_mode=True)
     time.sleep(0.001)
-    
+
     tib = spawn_tiburoncin(src_port, dst_port, to_file=True)
-    
+
     src = spawn_netcat(src_port, listen_mode=False)
     time.sleep(0.001)
 
@@ -27,11 +27,11 @@ def test():
     print "src to dst dump:"
     with open('dump.stod', 'rt') as s:
         print s.read()
-    
+
     print "dst to src dump:"
     with open('dump.dtos', 'rt') as s:
         print s.read()
-    
+
     print
     dump(tib, "Tiburoncin's point of view")
 

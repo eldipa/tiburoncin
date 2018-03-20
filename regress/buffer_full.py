@@ -9,15 +9,15 @@ def test(buf_sizes):
           "incoming data.\n"
 
     print "Buf sizes (src->dst : dst->src): %s" % str(buf_sizes)
-    print 
+    print
     src_port, dst_port = pair_ports()
 
     dst = spawn_netcat(dst_port, listen_mode=True)
     time.sleep(0.001)
-    
+
     tib = spawn_tiburoncin(src_port, dst_port, buf_sizes=buf_sizes)
     buf_sizes = tib.buf_sizes
-    
+
     src = spawn_netcat(src_port, listen_mode=False)
     time.sleep(0.001)
 

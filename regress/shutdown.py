@@ -7,9 +7,9 @@ def test_sender_close_pipe():
 
     dst = spawn_netcat(dst_port, listen_mode=True)
     time.sleep(0.001)
-    
+
     tib = spawn_tiburoncin(src_port, dst_port)
-    
+
     src = spawn_netcat(src_port, listen_mode=False)
     time.sleep(0.001)
 
@@ -21,7 +21,7 @@ def test_sender_close_pipe():
     wait_for_process(src)
     wait_for_process(tib)
     wait_for_process(dst)
-    
+
     print "All processes finished."
     dst.stdin.close()
 
@@ -40,9 +40,9 @@ def test_receiver_close_pipe():
 
     dst = spawn_netcat(dst_port, listen_mode=True)
     time.sleep(0.001)
-    
+
     tib = spawn_tiburoncin(src_port, dst_port)
-    
+
     src = spawn_netcat(src_port, listen_mode=False)
     time.sleep(0.001)
 
@@ -54,7 +54,7 @@ def test_receiver_close_pipe():
     wait_for_process(src)
     wait_for_process(tib)
     wait_for_process(dst)
-    
+
     print "All processes finished."
     src.stdin.close()
 

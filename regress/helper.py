@@ -73,7 +73,7 @@ def spawn_netcat(port, listen_mode, receive_buf_sz=None):
 
 @process_track
 def spawn_tiburoncin(src_port, dst_port, buf_sizes=None, skt_buf_sizes=None, to_file=False):
-    cmd = ["./tiburoncin", "-s", "127.0.0.1:"+str(src_port), 
+    cmd = ["./tiburoncin", "-s", "127.0.0.1:"+str(src_port),
                            "-d", "127.0.0.1:"+str(dst_port)]
 
     if buf_sizes is not None:
@@ -97,14 +97,14 @@ def spawn_tiburoncin(src_port, dst_port, buf_sizes=None, skt_buf_sizes=None, to_
 
     if to_file:
         cmd.append("-o")
- 
-    proc = subprocess.Popen(cmd, shell=False, 
+
+    proc = subprocess.Popen(cmd, shell=False,
                      stdout=subprocess.PIPE,
                      stdin=open(os.devnull),
                      stderr=subprocess.STDOUT)
     proc.script = []
     proc.buf_sizes = buf_sizes
-    
+
     fd = proc.stdout.fileno()
     fl = fcntl.fcntl(fd, fcntl.F_GETFL)
     fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)

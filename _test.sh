@@ -2,10 +2,10 @@
 
 for baseline_file in regress/$1*.py.baseline; do
 	test_file="regress/$(basename $baseline_file .baseline)"
-	if [ ! -f "$baseline_file" ]; then 
+	if [ ! -f "$baseline_file" ]; then
 		continue
 	fi
-	
+
         _name=$(echo -n "$baseline_file" | cut -c 1-64)
         _off=$((${#_name} - 64 + 1))
 
