@@ -88,8 +88,8 @@ B is in sync
  by default, both buffers are not changed. See man socket(7)
 
  -o save the received data onto two files:
-  dump.stod for the data received from A
-  dump.dtos for the data received from B
+  AtoB.dump for the data received from A
+  BtoA.dump for the data received from B
  in both cases a raw hexdump is saved which can be recovered later
  running 'xxd -p -c 16 -r <raw hexdump file>'. See man xxd(1)
 ```
