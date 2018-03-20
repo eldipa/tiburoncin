@@ -22,7 +22,7 @@ size_t circular_buffer_get_ready(struct circular_buffer_t *b);
 void circular_buffer_advance_head(struct circular_buffer_t *b, size_t s);
 void circular_buffer_advance_tail(struct circular_buffer_t *b, size_t s);
 
-/* 
+/*
  *    /- head/tail
  *   V
  *   +--------------------------+
@@ -56,8 +56,8 @@ void circular_buffer_advance_tail(struct circular_buffer_t *b, size_t s);
  *   assert ( head >= tail )
  *
  *
- *    /- head       /- tail     
- *   V             V            
+ *    /- head       /- tail
+ *   V             V
  *   +--------------------------+
  *   |             :::::::::::::|
  *   +--------------------------+
@@ -67,8 +67,8 @@ void circular_buffer_advance_tail(struct circular_buffer_t *b, size_t s);
  *   assert ( tail >= head )
  *
  *
- *                /- head        /- tail     
- *               V              V            
+ *                /- head        /- tail
+ *               V              V
  *   +--------------------------+
  *   |:::::::::::               |
  *   +--------------------------+
@@ -83,7 +83,7 @@ void circular_buffer_advance_tail(struct circular_buffer_t *b, size_t s);
  *   +--------------------------+
  *   |:::::::::::               |
  *   +--------------------------+
- *   full  = false 
+ *   full  = false
  *   free  = sz - head
  *   ready = head - tail
  *   assert ( head >= tail )

@@ -27,7 +27,7 @@ void parse_address(char *addr_str, char **host, char **serv) {
 
 	if (colon) {
 		*colon = 0;
-		
+
 		if (addr_str[0]) {
 			/* form host:service */
 			*host = addr_str;
@@ -59,7 +59,7 @@ int parse_buffer_sizes(char *sz_str, size_t buf_sizes[2]) {
 	}
 	else {
 		values[0] = values[1] = strtoll(sz_str, NULL, 0);
-		
+
 	}
 
 	for (int i = 0; i < 2; ++i) {
@@ -77,7 +77,7 @@ int parse_buffer_sizes(char *sz_str, size_t buf_sizes[2]) {
 	return 0;
 }
 
-int parse_cmd_line(int argc, char *argv[], struct endpoint *src, 
+int parse_cmd_line(int argc, char *argv[], struct endpoint *src,
 		struct endpoint *dst, size_t buf_sizes[2],
 		size_t skt_buf_sizes[2], const char *out_filenames[2]) {
 	int ret = -1;
@@ -86,7 +86,7 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *src,
 
 	/* default values */
 	buf_sizes[0] = buf_sizes[1] = DEFAULT_BUF_SIZE;
-	skt_buf_sizes[0] = skt_buf_sizes[1] = 0; 
+	skt_buf_sizes[0] = skt_buf_sizes[1] = 0;
 	out_filenames[0] = out_filenames[1] = 0;
 
 	while ((opt = getopt(argc, argv, "s:d:b:z:o")) != -1) {
@@ -96,7 +96,7 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *src,
 				parse_address(optarg, &src->host, &src->serv);
 				opt_found |= 1;
 				break;
-				
+
 			case 'd':
 				/* destination configuration */
 				parse_address(optarg, &dst->host, &dst->serv);
@@ -118,13 +118,13 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *src,
 					return ret;
 				}
 				break;
-			
+
 			case 'o':
 				/* save capture onto the output files */
 				out_filenames[0] = DEFAULT_SRC2DST_DUMPFILENAME;
 				out_filenames[1] = DEFAULT_DST2SRC_DUMPFILENAME;
 				break;
-				
+
 			default:
 				fprintf(stderr, "Unknow argument.\n");
 				return ret;
@@ -168,7 +168,7 @@ void usage(char *argv[]) {
 	       "  %s for the data received from dst\n"
 	       " in both cases a raw hexdump is saved which can be recovered later\n"
 	       " running 'xxd -p -c 16 -r <raw hexdump file>'. See man xxd(1)\n",
-	       argv[0], DEFAULT_HOST, DEFAULT_BUF_SIZE, 
+	       argv[0], DEFAULT_HOST, DEFAULT_BUF_SIZE,
 			DEFAULT_SRC2DST_DUMPFILENAME, DEFAULT_DST2SRC_DUMPFILENAME);
 }
 

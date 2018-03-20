@@ -16,7 +16,7 @@ struct endpoint;
  * */
 int wait_for_connection(struct endpoint *src, size_t skt_buf_sizes[2]);
 
-/* 
+/*
  * Establish a connection to host:serv defined in the endpoint dst.
  *
  * Save the file descriptor of the peer socket if it succeeds into dst
@@ -27,7 +27,7 @@ int establish_connection(struct endpoint *dst, size_t skt_buf_sizes[2]);
 
 
 /*
- * Shutdown any open flow and close the endpoint 
+ * Shutdown any open flow and close the endpoint
  * */
 void shutdown_and_close(struct endpoint *p);
 

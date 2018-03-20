@@ -19,7 +19,7 @@
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
-int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer, 
+int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer,
 		fd_set *rfds, fd_set *wfds,
 		struct circular_buffer_t *b,
 		struct hexdump *hd) {
@@ -29,11 +29,11 @@ int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer,
 
 	if (FD_ISSET(producer, rfds)) {	 // ready to produce
 		s = read(producer, &b->buf[b->head], circular_buffer_get_free(b));
-		if (s < 0) 
+		if (s < 0)
 			return -1;
 
 		/* ack to the other end that we received the shutdown */
-		if (s == 0) 
+		if (s == 0)
 			partial_shutdown(ep_producer, SHUT_RD);
 
 		/* print what we got */
@@ -45,7 +45,7 @@ int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer,
 
 	if (FD_ISSET(consumer, wfds)) {	 // ready to consume
 		s = write(consumer, &b->buf[b->tail], circular_buffer_get_ready(b));
-		if (s < 0) 
+		if (s < 0)
 			return -1;
 
 		/* ack to the other end that we received the shutdown */
@@ -86,14 +86,14 @@ enum pipe_status {
 	PIPE_BROKEN
 };
 enum pipe_status enable_read_write(struct endpoint *ep_producer,
-		struct endpoint *ep_consumer,	
+		struct endpoint *ep_consumer,
 		fd_set *rfds, fd_set *wfds,
 		struct circular_buffer_t *buf) {
 
 	int producer = ep_producer->fd;
 	int consumer = ep_consumer->fd;
-	
-	/* 
+
+	/*
 	 * Are our both endpoints, the consumer and the producer
 	 * closed? If we have data in the pipe means that the pipe
 	 * is broken, otherwise means that we are done, close the
@@ -105,7 +105,7 @@ enum pipe_status enable_read_write(struct endpoint *ep_producer,
 		else
 			return PIPE_CLOSED;
 	}
-	
+
 	/*
 	 * If our consumer closed his side of the pipe means that we cannot
 	 * write any data any more.
@@ -128,9 +128,9 @@ enum pipe_status enable_read_write(struct endpoint *ep_producer,
 		else
 			return PIPE_CLOSED;
 	}
-	
+
 	/*
-	 * If the producer closed his side of the pipe means that we will 
+	 * If the producer closed his side of the pipe means that we will
 	 * not have more data in the pipe.
 	 * If the pipe is already empty, close the consumer, closing the
 	 * pipe, acknowling to the consumer that we are closing.
@@ -145,7 +145,7 @@ enum pipe_status enable_read_write(struct endpoint *ep_producer,
 		}
 		else {
 			/* keep the pipe and don't close the consumer
-			 * we want to keep flushing all the data that 
+			 * we want to keep flushing all the data that
 			 * we have in the pipe before closing it
 			 * */
 		}
@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
 	size_t skt_buf_sizes[2] = {0, 0};
 	const char *out_filenames[2] = {0, 0};
 
-	if (parse_cmd_line(argc, argv, &src, &dst, buf_sizes, skt_buf_sizes, 
+	if (parse_cmd_line(argc, argv, &src, &dst, buf_sizes, skt_buf_sizes,
 				out_filenames)) {
 		usage(argv);
 		return ret;
@@ -204,7 +204,7 @@ int main(int argc, char *argv[]) {
 		perror("Buffer allocation for src->dst failed");
 		goto buf_stod_failed;
 	}
-	
+
 	struct circular_buffer_t buf_dtos;
 	if (circular_buffer_init(&buf_dtos, buf_sizes[1]) != 0) {
 		perror("Buffer allocation for dst->src failed");
@@ -228,13 +228,13 @@ int main(int argc, char *argv[]) {
 
 	enum pipe_status pstatus_stod = PIPE_OPEN;
 	enum pipe_status pstatus_dtos = PIPE_OPEN;
-	
+
 	while (1) {
 		FD_ZERO(&rfds);
 		FD_ZERO(&wfds);
 
 		if (pstatus_stod == PIPE_OPEN)
-			pstatus_stod = enable_read_write(&src, &dst, 
+			pstatus_stod = enable_read_write(&src, &dst,
 						&rfds, &wfds,
 						&buf_stod);
 
@@ -242,7 +242,7 @@ int main(int argc, char *argv[]) {
 			pstatus_dtos = enable_read_write(&dst, &src,
 						&rfds, &wfds,
 						&buf_dtos);
-		
+
 
 		if (pstatus_stod != PIPE_OPEN && pstatus_dtos != PIPE_OPEN)
 			break; /* we finished: no data can be sent from
@@ -259,7 +259,7 @@ int main(int argc, char *argv[]) {
 			perror("Passthrough from src to dst failed");
 			goto passthrough_failed;
 		}
-		
+
 		if (passthrough(&dst, &src, &rfds, &wfds, &buf_dtos, &hd_dtos) != 0) {
 			perror("Passthrough from dst to src failed");
 			goto passthrough_failed;

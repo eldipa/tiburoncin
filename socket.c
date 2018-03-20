@@ -88,12 +88,12 @@ int set_listening(struct endpoint *src, size_t skt_buf_sizes[2]) {
 	struct addrinfo *result, *rp;
 
 	s = resolv(src, &result);
-	if (s != 0) 
+	if (s != 0)
 		goto resolv_failed;
 
 	for (rp = result; rp != NULL; rp = rp->ai_next) {
 		fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-		
+
 		if (fd == -1) {
 			last_errno = errno;
 			continue;
@@ -103,7 +103,7 @@ int set_listening(struct endpoint *src, size_t skt_buf_sizes[2]) {
 			last_errno = errno;
 			continue;
 		}
-		
+
 		if (set_socket_buffer_sizes(fd, skt_buf_sizes) != 0) {
 			last_errno = errno;
 			continue;
@@ -115,9 +115,9 @@ int set_listening(struct endpoint *src, size_t skt_buf_sizes[2]) {
 
 		/* bad */
 		last_errno = errno;
-		close(fd);	
+		close(fd);
 	}
-	
+
 	freeaddrinfo(result);
 	errno = last_errno;
 
@@ -154,12 +154,12 @@ int wait_for_connection(struct endpoint *src, size_t skt_buf_sizes[2]) {
 
 	shutdown(passive_fd, SHUT_RDWR);
 	close(passive_fd);
-	
+
 listening_failed:
 	return ret;
 }
 
-/* 
+/*
  * Establish a connection to host:serv defined in the endpoint dst.
  *
  * Save the file descriptor of the peer socket if it succeeds into dst
@@ -168,14 +168,14 @@ listening_failed:
  * */
 int establish_connection(struct endpoint *dst, size_t skt_buf_sizes[2]) {
 	int ret = -1;
-	
+
 	int fd;
 	int s;
 	int last_errno = 0;
 	struct addrinfo *result, *rp;
 
 	s = resolv(dst, &result);
-	if (s != 0) 
+	if (s != 0)
 		goto resolv_failed;
 
 	for (rp = result; rp != NULL; rp = rp->ai_next) {
@@ -185,7 +185,7 @@ int establish_connection(struct endpoint *dst, size_t skt_buf_sizes[2]) {
 			last_errno = errno;
 			continue;
 		}
-		
+
 		if (set_socket_buffer_sizes(fd, skt_buf_sizes) != 0) {
 			last_errno = errno;
 			continue;
@@ -196,9 +196,9 @@ int establish_connection(struct endpoint *dst, size_t skt_buf_sizes[2]) {
 
 		/* bad */
 		last_errno = errno;
-		close(fd);	
+		close(fd);
 	}
-	
+
 	freeaddrinfo(result);
 	errno = last_errno;
 

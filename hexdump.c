@@ -4,7 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 
-int hexdump_init(struct hexdump *hd, const char *from, const char *to, 
+int hexdump_init(struct hexdump *hd, const char *from, const char *to,
 			const char *color_escape, const char *out_filename) {
 	memset(hd, 0, sizeof(*hd));
 	hd->from = from;
@@ -22,7 +22,7 @@ int hexdump_init(struct hexdump *hd, const char *from, const char *to,
 }
 
 void hexdump_destroy(struct hexdump *hd) {
-	if (hd->out_file) 
+	if (hd->out_file)
 		fclose(hd->out_file);
 }
 
@@ -50,7 +50,7 @@ size_t print_half_hex(struct hexdump *hd, size_t begin, int half,
 	return i;
 }
 
-size_t print_ascii(struct hexdump *hd, size_t begin, 
+size_t print_ascii(struct hexdump *hd, size_t begin,
 		const char *buf, unsigned int sz) {
 
 	size_t offset = begin;
@@ -73,11 +73,11 @@ size_t print_ascii(struct hexdump *hd, size_t begin,
 
 	return i;
 }
-	
+
 size_t print_full_hex(struct hexdump *hd, size_t start_line_offset,
 		const char *buf, unsigned int sz) {
 	size_t consumed = print_half_hex(hd, start_line_offset, 0, buf, sz);
-	
+
 	buf += consumed;
 	sz  -= consumed;
 
@@ -112,7 +112,7 @@ void hexdump_sent_print(struct hexdump *hd, const char *buf, unsigned int sz) {
 	hexdump_print_raw_hex(hd, buf, sz);
 	while (sz > 0) {
 		printf("%08x  ", hd->offset);
-	
+
 		size_t start_line_offset = (hd->offset >> 4) << 4;
 		print_full_hex(hd, start_line_offset, buf, sz);
 
@@ -138,7 +138,7 @@ void hexdump_remain_print(struct hexdump *hd, unsigned int sz_consumed) {
 		printf("%s is in sync\n", hd->to);
 	}
 	else {
-		printf("%s is %i bytes behind\n", 
+		printf("%s is %i bytes behind\n",
 				hd->to, hd->offset - hd->offset_consumer);
 	}
 
