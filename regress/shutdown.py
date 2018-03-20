@@ -3,31 +3,31 @@ from helper import *
 @kill_processes_tracked
 def test_sender_close_pipe():
     print "Close the pipe from the sender side after all the data was sent."
-    src_port, dst_port = pair_ports()
+    A_port, B_port = pair_ports()
 
-    dst = spawn_netcat(dst_port, listen_mode=True)
+    B = spawn_netcat(B_port, listen_mode=True)
     time.sleep(0.001)
 
-    tib = spawn_tiburoncin(src_port, dst_port)
+    tib = spawn_tiburoncin(A_port, B_port)
 
-    src = spawn_netcat(src_port, listen_mode=False)
+    A = spawn_netcat(A_port, listen_mode=False)
     time.sleep(0.001)
 
-    send(src, dst, tib, "hello\n")
+    send(A, B, tib, "hello\n")
 
-    print "Closing src..."
-    src.stdin.close()
+    print "Closing A..."
+    A.stdin.close()
 
-    wait_for_process(src)
+    wait_for_process(A)
     wait_for_process(tib)
-    wait_for_process(dst)
+    wait_for_process(B)
 
     print "All processes finished."
-    dst.stdin.close()
+    B.stdin.close()
 
-    dump(src, "Src's point of view")
+    dump(A, "Src's point of view")
     print
-    dump(dst, "Dst's point of view")
+    dump(B, "Dst's point of view")
     print
     dump(tib, "Tiburoncin's point of view")
 
@@ -36,31 +36,31 @@ def test_sender_close_pipe():
 @kill_processes_tracked
 def test_receiver_close_pipe():
     print "Close the pipe from the receiver side after all the data was received."
-    src_port, dst_port = pair_ports()
+    A_port, B_port = pair_ports()
 
-    dst = spawn_netcat(dst_port, listen_mode=True)
+    B = spawn_netcat(B_port, listen_mode=True)
     time.sleep(0.001)
 
-    tib = spawn_tiburoncin(src_port, dst_port)
+    tib = spawn_tiburoncin(A_port, B_port)
 
-    src = spawn_netcat(src_port, listen_mode=False)
+    A = spawn_netcat(A_port, listen_mode=False)
     time.sleep(0.001)
 
-    send(src, dst, tib, "hello\n")
+    send(A, B, tib, "hello\n")
 
-    print "Closing dst..."
-    dst.stdin.close()
+    print "Closing B..."
+    B.stdin.close()
 
-    wait_for_process(src)
+    wait_for_process(A)
     wait_for_process(tib)
-    wait_for_process(dst)
+    wait_for_process(B)
 
     print "All processes finished."
-    src.stdin.close()
+    A.stdin.close()
 
-    dump(src, "Src's point of view")
+    dump(A, "Src's point of view")
     print
-    dump(dst, "Dst's point of view")
+    dump(B, "Dst's point of view")
     print
     dump(tib, "Tiburoncin's point of view")
 

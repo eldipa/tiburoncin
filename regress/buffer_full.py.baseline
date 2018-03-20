@@ -3,7 +3,7 @@ or it is full. We expect that the sender will block waiting
 for tiburoncin to flush its buffer to make more room for the
 incoming data.
 
-Buf sizes (src->dst : dst->src): (1, 2048)
+Buf sizes (A->B : B->A): (1, 2048)
 
 Src's point of view
 > AAA
@@ -16,29 +16,29 @@ Dst's point of view
 
 
 Tiburoncin's point of view
-Connecting to dst <addr>...
-Waiting for a connection from src <addr>...
+Connecting to B <addr>...
+Waiting for a connection from A <addr>...
 Allocating buffers: 1 and 2048 bytes...
-src -> dst sent 1 bytes
+A -> B sent 1 bytes
 00000000  41                                                |A               |
-dst is 1 bytes behind
-dst is in sync
-src -> dst sent 1 bytes
+B is 1 bytes behind
+B is in sync
+A -> B sent 1 bytes
 00000001     41                                             | A              |
-dst is 1 bytes behind
-dst is in sync
-src -> dst sent 1 bytes
+B is 1 bytes behind
+B is in sync
+A -> B sent 1 bytes
 00000002        41                                          |  A             |
-dst is 1 bytes behind
-dst is in sync
-src -> dst sent 1 bytes
+B is 1 bytes behind
+B is in sync
+A -> B sent 1 bytes
 00000003           0a                                       |   .            |
-dst is 1 bytes behind
-dst is in sync
-dst -> src sent 4 bytes
+B is 1 bytes behind
+B is in sync
+B -> A sent 4 bytes
 00000000  42 42 42 0a                                       |BBB.            |
-src is 4 bytes behind
-src is in sync
+A is 4 bytes behind
+A is in sync
 
 Tiburoncin's return code: 0
 
@@ -47,7 +47,7 @@ or it is full. We expect that the sender will block waiting
 for tiburoncin to flush its buffer to make more room for the
 incoming data.
 
-Buf sizes (src->dst : dst->src): (2, 2048)
+Buf sizes (A->B : B->A): (2, 2048)
 
 Src's point of view
 > AAA
@@ -60,21 +60,21 @@ Dst's point of view
 
 
 Tiburoncin's point of view
-Connecting to dst <addr>...
-Waiting for a connection from src <addr>...
+Connecting to B <addr>...
+Waiting for a connection from A <addr>...
 Allocating buffers: 2 and 2048 bytes...
-src -> dst sent 2 bytes
+A -> B sent 2 bytes
 00000000  41 41                                             |AA              |
-dst is 2 bytes behind
-dst is in sync
-src -> dst sent 2 bytes
+B is 2 bytes behind
+B is in sync
+A -> B sent 2 bytes
 00000002        41 0a                                       |  A.            |
-dst is 2 bytes behind
-dst is in sync
-dst -> src sent 4 bytes
+B is 2 bytes behind
+B is in sync
+B -> A sent 4 bytes
 00000000  42 42 42 0a                                       |BBB.            |
-src is 4 bytes behind
-src is in sync
+A is 4 bytes behind
+A is in sync
 
 Tiburoncin's return code: 0
 
@@ -83,7 +83,7 @@ or it is full. We expect that the sender will block waiting
 for tiburoncin to flush its buffer to make more room for the
 incoming data.
 
-Buf sizes (src->dst : dst->src): (4, 2048)
+Buf sizes (A->B : B->A): (4, 2048)
 
 Src's point of view
 > AAA
@@ -96,17 +96,17 @@ Dst's point of view
 
 
 Tiburoncin's point of view
-Connecting to dst <addr>...
-Waiting for a connection from src <addr>...
+Connecting to B <addr>...
+Waiting for a connection from A <addr>...
 Allocating buffers: 4 and 2048 bytes...
-src -> dst sent 4 bytes
+A -> B sent 4 bytes
 00000000  41 41 41 0a                                       |AAA.            |
-dst is 4 bytes behind
-dst is in sync
-dst -> src sent 4 bytes
+B is 4 bytes behind
+B is in sync
+B -> A sent 4 bytes
 00000000  42 42 42 0a                                       |BBB.            |
-src is 4 bytes behind
-src is in sync
+A is 4 bytes behind
+A is in sync
 
 Tiburoncin's return code: 0
 
@@ -115,7 +115,7 @@ or it is full. We expect that the sender will block waiting
 for tiburoncin to flush its buffer to make more room for the
 incoming data.
 
-Buf sizes (src->dst : dst->src): 3
+Buf sizes (A->B : B->A): 3
 
 Src's point of view
 > AAA
@@ -128,25 +128,25 @@ Dst's point of view
 
 
 Tiburoncin's point of view
-Connecting to dst <addr>...
-Waiting for a connection from src <addr>...
+Connecting to B <addr>...
+Waiting for a connection from A <addr>...
 Allocating buffers: 3 and 3 bytes...
-src -> dst sent 3 bytes
+A -> B sent 3 bytes
 00000000  41 41 41                                          |AAA             |
-dst is 3 bytes behind
-dst is in sync
-src -> dst sent 1 bytes
+B is 3 bytes behind
+B is in sync
+A -> B sent 1 bytes
 00000003           0a                                       |   .            |
-dst is 1 bytes behind
-dst is in sync
-dst -> src sent 3 bytes
+B is 1 bytes behind
+B is in sync
+B -> A sent 3 bytes
 00000000  42 42 42                                          |BBB             |
-src is 3 bytes behind
-src is in sync
-dst -> src sent 1 bytes
+A is 3 bytes behind
+A is in sync
+B -> A sent 1 bytes
 00000003           0a                                       |   .            |
-src is 1 bytes behind
-src is in sync
+A is 1 bytes behind
+A is in sync
 
 Tiburoncin's return code: 0
 

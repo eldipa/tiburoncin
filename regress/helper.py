@@ -72,9 +72,9 @@ def spawn_netcat(port, listen_mode, receive_buf_sz=None):
 
 
 @process_track
-def spawn_tiburoncin(src_port, dst_port, buf_sizes=None, skt_buf_sizes=None, to_file=False):
-    cmd = ["./tiburoncin", "-s", "127.0.0.1:"+str(src_port),
-                           "-d", "127.0.0.1:"+str(dst_port)]
+def spawn_tiburoncin(A_port, B_port, buf_sizes=None, skt_buf_sizes=None, to_file=False):
+    cmd = ["./tiburoncin", "-A", "127.0.0.1:"+str(A_port),
+                           "-B", "127.0.0.1:"+str(B_port)]
 
     if buf_sizes is not None:
         try:

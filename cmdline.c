@@ -16,8 +16,8 @@
 #define DEFAULT_HOST "localhost"
 #define DEFAULT_BUF_SIZE (2048)
 
-#define DEFAULT_SRC2DST_DUMPFILENAME "dump.stod"
-#define DEFAULT_DST2SRC_DUMPFILENAME "dump.dtos"
+#define DEFAULT_A_TO_B_DUMPFILENAME "AtoB.dump"
+#define DEFAULT_B_TO_A_DUMPFILENAME "BtoA.dump"
 
 #define TIBURONCIN_AUTHOR "Martin Di Paola"
 #define TIBURONCIN_URL "https://github.com/eldipa/tiburoncin"
@@ -82,8 +82,8 @@ int parse_buffer_sizes(char *sz_str, size_t buf_sizes[2]) {
 	return 0;
 }
 
-int parse_cmd_line(int argc, char *argv[], struct endpoint *src,
-		struct endpoint *dst, size_t buf_sizes[2],
+int parse_cmd_line(int argc, char *argv[], struct endpoint *A,
+		struct endpoint *B, size_t buf_sizes[2],
 		size_t skt_buf_sizes[2], const char *out_filenames[2]) {
 	int ret = -1;
 	int opt;
@@ -94,17 +94,17 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *src,
 	skt_buf_sizes[0] = skt_buf_sizes[1] = 0;
 	out_filenames[0] = out_filenames[1] = 0;
 
-	while ((opt = getopt(argc, argv, "s:d:b:z:o")) != -1) {
+	while ((opt = getopt(argc, argv, "A:B:b:z:o")) != -1) {
 		switch (opt) {
-			case 's':
-				/* source configuration */
-				parse_address(optarg, &src->host, &src->serv);
+			case 'A':
+				/* A configuration */
+				parse_address(optarg, &A->host, &A->serv);
 				opt_found |= 1;
 				break;
 
-			case 'd':
-				/* destination configuration */
-				parse_address(optarg, &dst->host, &dst->serv);
+			case 'B':
+				/* B configuration */
+				parse_address(optarg, &B->host, &B->serv);
 				opt_found |= 2;
 				break;
 
@@ -126,8 +126,8 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *src,
 
 			case 'o':
 				/* save capture onto the output files */
-				out_filenames[0] = DEFAULT_SRC2DST_DUMPFILENAME;
-				out_filenames[1] = DEFAULT_DST2SRC_DUMPFILENAME;
+				out_filenames[0] = DEFAULT_A_TO_B_DUMPFILENAME;
+				out_filenames[1] = DEFAULT_B_TO_A_DUMPFILENAME;
 				break;
 
 			default:
@@ -138,7 +138,7 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *src,
 	}
 
 	if ((opt_found & (1 | 2)) != (1 | 2)) {
-		fprintf(stderr, "Missing arguments. You need to pass -s and -d flags.\n");
+		fprintf(stderr, "Missing arguments. You need to pass -A and -B flags.\n");
 		return ret;
 	}
 
@@ -150,7 +150,7 @@ void what(char *argv[]) {
 	printf("tiburoncin\n"
 	       "==========\n"
 	       "\n"
-	       "Small man in the middle tool to inspect the traffic between two endpoints.\n"
+	       "Small man in the middle tool to inspect the traffic between two endpoints A and B.\n"
 	       "Mostly to be used for students wanting to know what data is flowing in a TCP channel.\n"
 	       "\n"
 	       "Author: %s\n"
@@ -163,8 +163,8 @@ void what(char *argv[]) {
 }
 
 void usage(char *argv[]) {
-	printf("%s -s <src> -d <dst> [-b <bsz>] [-z <bsz>] [-o]\n"
-	       " where <src> and <dst> can be of the form:\n"
+	printf("%s -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o]\n"
+	       " where <addr> can be of the form:\n"
 	       "  - host:serv\n"
 	       "  - :serv\n"
 	       "  - serv\n"
@@ -175,7 +175,7 @@ void usage(char *argv[]) {
 	       " -b <bsz> sets the buffer size of tiburocin\n"
 	       " where <bsz> is a size in bytes of the form:\n"
 	       "  - num      sets the size of both buffers to that value\n"
-	       "  - num:num  sets sizes for src->dst and dst->src buffers\n"
+	       "  - num:num  sets sizes for A->B and B->A buffers\n"
 	       " by default, both buffers are of %i bytes\n"
 	       " \n"
 	       " -z <bsz> sets the buffer size of the sockets\n"
@@ -185,12 +185,12 @@ void usage(char *argv[]) {
 	       " by default, both buffers are not changed. See man socket(7)\n"
 	       " \n"
 	       " -o save the received data onto two files:\n"
-	       "  %s for the data received from src\n"
-	       "  %s for the data received from dst\n"
+	       "  %s for the data received from A\n"
+	       "  %s for the data received from B\n"
 	       " in both cases a raw hexdump is saved which can be recovered later\n"
 	       " running 'xxd -p -c 16 -r <raw hexdump file>'. See man xxd(1)\n",
 	       argv[0], DEFAULT_HOST, DEFAULT_BUF_SIZE,
-			DEFAULT_SRC2DST_DUMPFILENAME, DEFAULT_DST2SRC_DUMPFILENAME);
+			DEFAULT_A_TO_B_DUMPFILENAME, DEFAULT_B_TO_A_DUMPFILENAME);
 }
 
 #undef _POSIX_C_SOURCE

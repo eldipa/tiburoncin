@@ -34,4 +34,4 @@ coverage: clean
 	gcov *.c
 
 clean:
-	rm -f *.o *.gcov *.gcno *.gcda tiburoncin tiburoncin.bin valgrind*.out dump.dtos dump.stod
+	rm -f *.o *.gcov *.gcno *.gcda tiburoncin tiburoncin.bin valgrind*.out AtoB.dump BtoA.dump

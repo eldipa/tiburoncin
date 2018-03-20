@@ -8,22 +8,22 @@
 struct endpoint;
 
 /*
- * Wait for a connection on host:serv given in the endpoint src.
+ * Wait for a connection on host:serv given in the endpoint A.
  *
- * Save the file descriptor of the peer socket if it succeeds into src
+ * Save the file descriptor of the peer socket if it succeeds into A
  * and return 0.
  * On error, return -1 and errno is set appropriately.
  * */
-int wait_for_connection(struct endpoint *src, size_t skt_buf_sizes[2]);
+int wait_for_connection(struct endpoint *A, size_t skt_buf_sizes[2]);
 
 /*
- * Establish a connection to host:serv defined in the endpoint dst.
+ * Establish a connection to host:serv defined in the endpoint B.
  *
- * Save the file descriptor of the peer socket if it succeeds into dst
+ * Save the file descriptor of the peer socket if it succeeds into B
  * and return 0.
  * On error, return -1 and errno is set appropriately.
  * */
-int establish_connection(struct endpoint *dst, size_t skt_buf_sizes[2]);
+int establish_connection(struct endpoint *B, size_t skt_buf_sizes[2]);
 
 
 /*

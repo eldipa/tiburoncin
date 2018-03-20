@@ -172,82 +172,82 @@ enum pipe_status enable_read_write(struct endpoint *ep_producer,
 int main(int argc, char *argv[]) {
 	int ret = -1;
 	int s;
-	struct endpoint src, dst;
+	struct endpoint A, B;
 	size_t buf_sizes[2] = {0, 0};
 	size_t skt_buf_sizes[2] = {0, 0};
 	const char *out_filenames[2] = {0, 0};
 
-	if (parse_cmd_line(argc, argv, &src, &dst, buf_sizes, skt_buf_sizes,
+	if (parse_cmd_line(argc, argv, &A, &B, buf_sizes, skt_buf_sizes,
 				out_filenames)) {
 		what(argv);
 		usage(argv);
 		return ret;
 	}
 
-	/* us <--> dst */
-	printf("Connecting to dst %s:%s...\n", dst.host, dst.serv);
-	if (establish_connection(&dst, skt_buf_sizes) != 0) {
+	/* us <--> B */
+	printf("Connecting to B %s:%s...\n", B.host, B.serv);
+	if (establish_connection(&B, skt_buf_sizes) != 0) {
 		perror("Establish a connection to the destination failed");
 		goto establish_conn_failed;
 	}
 
-	/* src <--> us */
-	printf("Waiting for a connection from src %s:%s...\n", src.host, src.serv);
-	if (wait_for_connection(&src, skt_buf_sizes) != 0) {
+	/* A <--> us */
+	printf("Waiting for a connection from A %s:%s...\n", A.host, A.serv);
+	if (wait_for_connection(&A, skt_buf_sizes) != 0) {
 		perror("Wait for connection from the source failed");
 		goto wait_conn_failed;
 	}
 
 	printf("Allocating buffers: %lu and %lu bytes...\n", buf_sizes[0],
 					 			buf_sizes[1]);
-	struct circular_buffer_t buf_stod;
-	if (circular_buffer_init(&buf_stod, buf_sizes[0]) != 0) {
-		perror("Buffer allocation for src->dst failed");
-		goto buf_stod_failed;
+	struct circular_buffer_t buf_AtoB;
+	if (circular_buffer_init(&buf_AtoB, buf_sizes[0]) != 0) {
+		perror("Buffer allocation for A->B failed");
+		goto buf_AtoB_failed;
 	}
 
-	struct circular_buffer_t buf_dtos;
-	if (circular_buffer_init(&buf_dtos, buf_sizes[1]) != 0) {
-		perror("Buffer allocation for dst->src failed");
-		goto buf_dtos_failed;
+	struct circular_buffer_t buf_BtoA;
+	if (circular_buffer_init(&buf_BtoA, buf_sizes[1]) != 0) {
+		perror("Buffer allocation for B->A failed");
+		goto buf_BtoA_failed;
 	}
 
-	struct hexdump hd_stod;
-	if (hexdump_init(&hd_stod, "src", "dst", "\x1b[91m", out_filenames[0]) != 0) {
-		perror("Hexdump src->dst allocation failed");
-		goto hd_src_to_dst_failed;
+	struct hexdump hd_AtoB;
+	if (hexdump_init(&hd_AtoB, "A", "B", "\x1b[91m", out_filenames[0]) != 0) {
+		perror("Hexdump A->B allocation failed");
+		goto hd_A_to_B_failed;
 	}
 
-	struct hexdump hd_dtos;
-	if (hexdump_init(&hd_dtos, "dst", "src", "\x1b[94m", out_filenames[1]) != 0) {
-		perror("Hexdump dst->src allocation failed");
-		goto hd_dst_to_src_failed;
+	struct hexdump hd_BtoA;
+	if (hexdump_init(&hd_BtoA, "B", "A", "\x1b[94m", out_filenames[1]) != 0) {
+		perror("Hexdump B->A allocation failed");
+		goto hd_B_to_A_failed;
 	}
 
-	int nfds = MAX(src.fd, dst.fd) + 1;
+	int nfds = MAX(A.fd, B.fd) + 1;
 	fd_set rfds, wfds;
 
-	enum pipe_status pstatus_stod = PIPE_OPEN;
-	enum pipe_status pstatus_dtos = PIPE_OPEN;
+	enum pipe_status pstatus_AtoB = PIPE_OPEN;
+	enum pipe_status pstatus_BtoA = PIPE_OPEN;
 
 	while (1) {
 		FD_ZERO(&rfds);
 		FD_ZERO(&wfds);
 
-		if (pstatus_stod == PIPE_OPEN)
-			pstatus_stod = enable_read_write(&src, &dst,
+		if (pstatus_AtoB == PIPE_OPEN)
+			pstatus_AtoB = enable_read_write(&A, &B,
 						&rfds, &wfds,
-						&buf_stod);
+						&buf_AtoB);
 
-		if (pstatus_dtos == PIPE_OPEN)
-			pstatus_dtos = enable_read_write(&dst, &src,
+		if (pstatus_BtoA == PIPE_OPEN)
+			pstatus_BtoA = enable_read_write(&B, &A,
 						&rfds, &wfds,
-						&buf_dtos);
+						&buf_BtoA);
 
 
-		if (pstatus_stod != PIPE_OPEN && pstatus_dtos != PIPE_OPEN)
+		if (pstatus_AtoB != PIPE_OPEN && pstatus_BtoA != PIPE_OPEN)
 			break; /* we finished: no data can be sent from
-				  src to dst nor dst to src. */
+				  A to B nor B to A. */
 
 
 		s = select(nfds, &rfds, &wfds, NULL, NULL);
@@ -256,13 +256,13 @@ int main(int argc, char *argv[]) {
 			goto passthrough_failed;
 		}
 
-		if (passthrough(&src, &dst, &rfds, &wfds, &buf_stod, &hd_stod) != 0) {
-			perror("Passthrough from src to dst failed");
+		if (passthrough(&A, &B, &rfds, &wfds, &buf_AtoB, &hd_AtoB) != 0) {
+			perror("Passthrough from A to B failed");
 			goto passthrough_failed;
 		}
 
-		if (passthrough(&dst, &src, &rfds, &wfds, &buf_dtos, &hd_dtos) != 0) {
-			perror("Passthrough from dst to src failed");
+		if (passthrough(&B, &A, &rfds, &wfds, &buf_BtoA, &hd_BtoA) != 0) {
+			perror("Passthrough from B to A failed");
 			goto passthrough_failed;
 		}
 	}
@@ -270,22 +270,22 @@ int main(int argc, char *argv[]) {
 	ret = 0;
 
 passthrough_failed:
-	hexdump_destroy(&hd_dtos);
+	hexdump_destroy(&hd_BtoA);
 
-hd_dst_to_src_failed:
-	hexdump_destroy(&hd_stod);
+hd_B_to_A_failed:
+	hexdump_destroy(&hd_AtoB);
 
-hd_src_to_dst_failed:
-	circular_buffer_destroy(&buf_dtos);
+hd_A_to_B_failed:
+	circular_buffer_destroy(&buf_BtoA);
 
-buf_dtos_failed:
-	circular_buffer_destroy(&buf_stod);
+buf_BtoA_failed:
+	circular_buffer_destroy(&buf_AtoB);
 
-buf_stod_failed:
-	shutdown_and_close(&src);
+buf_AtoB_failed:
+	shutdown_and_close(&A);
 
 wait_conn_failed:
-	shutdown_and_close(&dst);
+	shutdown_and_close(&B);
 
 establish_conn_failed:
 	return ret;

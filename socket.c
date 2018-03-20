@@ -71,14 +71,14 @@ int set_socket_buffer_sizes(int fd, size_t skt_buf_sizes[2]) {
 
 /*
  * Create a socket in listening mode for accepting connections.
- * The socket will be listening on host:serv address set by src.
+ * The socket will be listening on host:serv address set by A.
  *
  * Return a valid file descriptor if it succeeds,
  * -1 if not.
  *  In case of error, errno is set appropriately.
  *  */
 static
-int set_listening(struct endpoint *src, size_t skt_buf_sizes[2]) {
+int set_listening(struct endpoint *A, size_t skt_buf_sizes[2]) {
 	int ret = -1;
 	int val = 1;
 
@@ -87,7 +87,7 @@ int set_listening(struct endpoint *src, size_t skt_buf_sizes[2]) {
 	int last_errno = 0;
 	struct addrinfo *result, *rp;
 
-	s = resolv(src, &result);
+	s = resolv(A, &result);
 	if (s != 0)
 		goto resolv_failed;
 
@@ -122,7 +122,7 @@ int set_listening(struct endpoint *src, size_t skt_buf_sizes[2]) {
 	errno = last_errno;
 
 	if (rp != NULL) {
-		src->fd = fd;
+		A->fd = fd;
 		ret = 0;
 	}
 
@@ -132,23 +132,23 @@ resolv_failed:
 }
 
 /*
- * Wait for a connection on host:serv given in the endpoint src.
+ * Wait for a connection on host:serv given in the endpoint A.
  *
- * Save the file descriptor of the peer socket if it succeeds into src
+ * Save the file descriptor of the peer socket if it succeeds into A
  * and return 0.
  * On error, return -1 and errno is set appropriately.
  * */
-int wait_for_connection(struct endpoint *src, size_t skt_buf_sizes[2]) {
+int wait_for_connection(struct endpoint *A, size_t skt_buf_sizes[2]) {
 	int ret = -1;
 
-	if (set_listening(src, skt_buf_sizes) == -1)
+	if (set_listening(A, skt_buf_sizes) == -1)
 		goto listening_failed;
 
-	int passive_fd = src->fd;
+	int passive_fd = A->fd;
 	int peerfd = accept(passive_fd, NULL, NULL);
 	if (peerfd > 0) {
-		src->fd = peerfd;
-		src->eof = 0;
+		A->fd = peerfd;
+		A->eof = 0;
 		ret = 0;
 	}
 
@@ -160,13 +160,13 @@ listening_failed:
 }
 
 /*
- * Establish a connection to host:serv defined in the endpoint dst.
+ * Establish a connection to host:serv defined in the endpoint B.
  *
- * Save the file descriptor of the peer socket if it succeeds into dst
+ * Save the file descriptor of the peer socket if it succeeds into B
  * and return 0.
  * On error, return -1 and errno is set appropriately.
  * */
-int establish_connection(struct endpoint *dst, size_t skt_buf_sizes[2]) {
+int establish_connection(struct endpoint *B, size_t skt_buf_sizes[2]) {
 	int ret = -1;
 
 	int fd;
@@ -174,7 +174,7 @@ int establish_connection(struct endpoint *dst, size_t skt_buf_sizes[2]) {
 	int last_errno = 0;
 	struct addrinfo *result, *rp;
 
-	s = resolv(dst, &result);
+	s = resolv(B, &result);
 	if (s != 0)
 		goto resolv_failed;
 
@@ -203,8 +203,8 @@ int establish_connection(struct endpoint *dst, size_t skt_buf_sizes[2]) {
 	errno = last_errno;
 
 	if (rp != NULL) {
-		dst->fd = fd;
-		dst->eof = 0;
+		B->fd = fd;
+		B->eof = 0;
 		ret = 0;
 	}
 

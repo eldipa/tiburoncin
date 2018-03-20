@@ -1,5 +1,5 @@
 Close the pipe from the sender side after all the data was sent.
-Closing src...
+Closing A...
 All processes finished.
 Src's point of view
 > hello
@@ -10,17 +10,17 @@ Dst's point of view
 
 
 Tiburoncin's point of view
-Connecting to dst <addr>...
-Waiting for a connection from src <addr>...
+Connecting to B <addr>...
+Waiting for a connection from A <addr>...
 Allocating buffers: 2048 and 2048 bytes...
-src -> dst sent 6 bytes
+A -> B sent 6 bytes
 00000000  68 65 6c 6c 6f 0a                                 |hello.          |
-dst is 6 bytes behind
-dst is in sync
+B is 6 bytes behind
+B is in sync
 
 Tiburoncin's return code: 0
 Close the pipe from the receiver side after all the data was received.
-Closing dst...
+Closing B...
 All processes finished.
 Src's point of view
 > hello
@@ -31,12 +31,12 @@ Dst's point of view
 
 
 Tiburoncin's point of view
-Connecting to dst <addr>...
-Waiting for a connection from src <addr>...
+Connecting to B <addr>...
+Waiting for a connection from A <addr>...
 Allocating buffers: 2048 and 2048 bytes...
-src -> dst sent 6 bytes
+A -> B sent 6 bytes
 00000000  68 65 6c 6c 6f 0a                                 |hello.          |
-dst is 6 bytes behind
-dst is in sync
+B is 6 bytes behind
+B is in sync
 
 Tiburoncin's return code: 0
