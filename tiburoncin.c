@@ -179,6 +179,7 @@ int main(int argc, char *argv[]) {
 
 	if (parse_cmd_line(argc, argv, &src, &dst, buf_sizes, skt_buf_sizes,
 				out_filenames)) {
+		what(argv);
 		usage(argv);
 		return ret;
 	}

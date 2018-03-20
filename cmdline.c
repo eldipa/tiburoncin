@@ -19,6 +19,11 @@
 #define DEFAULT_SRC2DST_DUMPFILENAME "dump.stod"
 #define DEFAULT_DST2SRC_DUMPFILENAME "dump.dtos"
 
+#define TIBURONCIN_AUTHOR "Martin Di Paola"
+#define TIBURONCIN_URL "https://github.com/eldipa/tiburoncin"
+#define TIBURONCIN_LICENSE "GPLv3"
+#define TIBURONCIN_VERSION "1.0.0"
+
 extern char *optarg;
 
 static
@@ -126,7 +131,7 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *src,
 				break;
 
 			default:
-				fprintf(stderr, "Unknow argument.\n");
+				fprintf(stderr, "Unknown argument.\n");
 				return ret;
 
 		}
@@ -139,6 +144,22 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *src,
 
 	ret = 0;
 	return ret;
+}
+
+void what(char *argv[]) {
+	printf("tiburoncin\n"
+	       "==========\n"
+	       "\n"
+	       "Small man in the middle tool to inspect the traffic between two endpoints.\n"
+	       "Mostly to be used for students wanting to know what data is flowing in a TCP channel.\n"
+	       "\n"
+	       "Author: %s\n"
+	       "URL: %s\n"
+	       "License: %s\n"
+	       "Version: %s\n"
+	       "\n",
+		TIBURONCIN_AUTHOR, TIBURONCIN_URL,
+		TIBURONCIN_LICENSE, TIBURONCIN_VERSION);
 }
 
 void usage(char *argv[]) {

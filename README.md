@@ -33,12 +33,12 @@ The following diagram depicts what's going on:
 | nc 127.0.0.1 \  |===========| tiburoncin -s 127.0.0.1:8081 \ |
 |    8081         |           |            -d 127.0.0.1:8082   |
 +-----------------+           +--------------------------------+
-                                             || 
+                                             ||
 +-----------------+                          ||
 |    <server>     | 8082                     ||
 | nc -l -p 8082 \ |==========================//
-|   127.0.0.      |           
-+-----------------+      
+|   127.0.0.      |
++-----------------+
 ```
 
 ### Capture example
@@ -73,19 +73,19 @@ dst is in sync
  If it is not specified, host will be localhost.
  In all the cases the host can be a hostname or an IP;
  for the service it can be a servicename or a port number.
- 
+
  -b <bsz> sets the buffer size of tiburocin
  where <bsz> is a size in bytes of the form:
   - num      sets the size of both buffers to that value
   - num:num  sets sizes for src->dst and dst->src buffers
  by default, both buffers are of 2048 bytes
- 
+
  -z <bsz> sets the buffer size of the sockets
  where <bsz> is a size in bytes of the form:
   - num      sets the size of both buffers SND and RCV to that value
   - num:num  sets sizes for SND and RCV buffers
  by default, both buffers are not changed. See man socket(7)
- 
+
  -o save the received data onto two files:
   dump.stod for the data received from src
   dump.dtos for the data received from dst
@@ -104,11 +104,11 @@ make compile
 ### Run the tests
 
 ```shell
-make test
+make _run_test
 ```
 
 ## How to contribute
 
-Make a fork and start to hack. 
-Keep your code as clean as possible and following the same coding style that the rest of the code and making small commits.
-When you finish, do a Pull Request.
+Make a fork and start to hack.
+Keep your code as clean as possible and following the same coding style.
+Make small commits and when you finish, do a Pull Request.

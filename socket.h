@@ -8,7 +8,7 @@
 struct endpoint;
 
 /*
- * Wait for a connecion on host:serv given in the endpoint src.
+ * Wait for a connection on host:serv given in the endpoint src.
  *
  * Save the file descriptor of the peer socket if it succeeds into src
  * and return 0.
