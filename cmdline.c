@@ -84,7 +84,8 @@ int parse_buffer_sizes(char *sz_str, size_t buf_sizes[2]) {
 
 int parse_cmd_line(int argc, char *argv[], struct endpoint *A,
 		struct endpoint *B, size_t buf_sizes[2],
-		size_t skt_buf_sizes[2], const char *out_filenames[2]) {
+		size_t skt_buf_sizes[2], const char *out_filenames[2],
+		int *colorless) {
 	int ret = -1;
 	int opt;
 	int opt_found = 0;
@@ -93,8 +94,9 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *A,
 	buf_sizes[0] = buf_sizes[1] = DEFAULT_BUF_SIZE;
 	skt_buf_sizes[0] = skt_buf_sizes[1] = 0;
 	out_filenames[0] = out_filenames[1] = 0;
+	*colorless = 0;
 
-	while ((opt = getopt(argc, argv, "A:B:b:z:o")) != -1) {
+	while ((opt = getopt(argc, argv, "A:B:b:z:oc")) != -1) {
 		switch (opt) {
 			case 'A':
 				/* A configuration */
@@ -130,6 +132,11 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *A,
 				out_filenames[1] = DEFAULT_B_TO_A_DUMPFILENAME;
 				break;
 
+			case 'c':
+				/* color less */
+				*colorless = 1;
+				break;
+
 			default:
 				fprintf(stderr, "Unknown argument.\n");
 				return ret;
@@ -163,7 +170,7 @@ void what(char *argv[]) {
 }
 
 void usage(char *argv[]) {
-	printf("%s -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o]\n"
+	printf("%s -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o] [-c]\n"
 	       " where <addr> can be of the form:\n"
 	       "  - host:serv\n"
 	       "  - :serv\n"
@@ -188,7 +195,9 @@ void usage(char *argv[]) {
 	       "  %s for the data received from A\n"
 	       "  %s for the data received from B\n"
 	       " in both cases a raw hexdump is saved which can be recovered later\n"
-	       " running 'xxd -p -c 16 -r <raw hexdump file>'. See man xxd(1)\n",
+	       " running 'xxd -p -c 16 -r <raw hexdump file>'. See man xxd(1)\n"
+	       " \n"
+	       " -c disable the color in the output (colorless)\n",
 	       argv[0], DEFAULT_HOST, DEFAULT_BUF_SIZE,
 			DEFAULT_A_TO_B_DUMPFILENAME, DEFAULT_B_TO_A_DUMPFILENAME);
 }

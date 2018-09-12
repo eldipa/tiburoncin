@@ -176,13 +176,19 @@ int main(int argc, char *argv[]) {
 	size_t buf_sizes[2] = {0, 0};
 	size_t skt_buf_sizes[2] = {0, 0};
 	const char *out_filenames[2] = {0, 0};
+	const char *colors[2] = {"\x1b[91m", "\x1b[94m"};
+	int colorless = 0;
 
 	if (parse_cmd_line(argc, argv, &A, &B, buf_sizes, skt_buf_sizes,
-				out_filenames)) {
+				out_filenames, &colorless)) {
 		what(argv);
 		usage(argv);
 		return ret;
 	}
+
+	/* disable the colors? */
+	if (colorless)
+		colors[0] = colors[1] = 0;
 
 	/* us <--> B */
 	printf("Connecting to B %s:%s...\n", B.host, B.serv);
@@ -213,13 +219,13 @@ int main(int argc, char *argv[]) {
 	}
 
 	struct hexdump hd_AtoB;
-	if (hexdump_init(&hd_AtoB, "A", "B", "\x1b[91m", out_filenames[0]) != 0) {
+	if (hexdump_init(&hd_AtoB, "A", "B", colors[0], out_filenames[0]) != 0) {
 		perror("Hexdump A->B allocation failed");
 		goto hd_A_to_B_failed;
 	}
 
 	struct hexdump hd_BtoA;
-	if (hexdump_init(&hd_BtoA, "B", "A", "\x1b[94m", out_filenames[1]) != 0) {
+	if (hexdump_init(&hd_BtoA, "B", "A", colors[1], out_filenames[1]) != 0) {
 		perror("Hexdump B->A allocation failed");
 		goto hd_B_to_A_failed;
 	}
