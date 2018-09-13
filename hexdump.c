@@ -154,3 +154,13 @@ void hexdump_remain_print(struct hexdump *hd, unsigned int sz_consumed) {
 	fflush(stdout);
 }
 
+void hexdump_shutdown_print(struct hexdump *hd) {
+	if (hd->color_escape)
+		printf("%s", hd->color_escape);
+
+	printf("%s -> %s flow shutdown\n", hd->from, hd->to);
+
+	if (hd->color_escape)
+		printf("%s", "\x1b[0m"); /* reset */
+	fflush(stdout);
+}

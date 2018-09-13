@@ -32,12 +32,15 @@ int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer,
 		if (s < 0)
 			return -1;
 
-		/* ack to the other end that we received the shutdown */
-		if (s == 0)
+		if (s == 0) {
+			/* ack to the other end that we received the shutdown */
 			partial_shutdown(ep_producer, SHUT_RD);
-
-		/* print what we got */
-		hexdump_sent_print(hd, &b->buf[b->head], s);
+			hexdump_shutdown_print(hd);
+		}
+		else {
+			/* print what we got */
+			hexdump_sent_print(hd, &b->buf[b->head], s);
+		}
 
 		/* update our head pointer */
 		circular_buffer_advance_head(b, s);
@@ -48,19 +51,22 @@ int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer,
 		if (s < 0)
 			return -1;
 
-		/* ack to the other end that we received the shutdown */
-		if (s == 0)
+		if (s == 0) {
+			/* ack to the other end that we received the shutdown */
 			partial_shutdown(ep_consumer, SHUT_WR);
-
-		/* print what we don't got */
-		hexdump_remain_print(hd, s);
+			hexdump_shutdown_print(hd);
+		}
+		else {
+			/* print how many is still here and we couldn't send */
+			hexdump_remain_print(hd, s);
+		}
 
 		/* update our tail pointer */
 		circular_buffer_advance_tail(b, s);
 
 	}
 	else if (FD_ISSET(producer, rfds)) {
-		/* print what we don't got */
+		/* print how many is still here and we couldn't send */
 		hexdump_remain_print(hd, 0);
 	}
 
