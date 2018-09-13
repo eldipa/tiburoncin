@@ -1,4 +1,4 @@
-import subprocess, os
+import subprocess, os, socket
 import random, time, math, fcntl
 
 _processes = []
@@ -172,4 +172,45 @@ def dump(proc_or_str, title):
     print(d)
 
 
+class netcat:
+    def __init__(self, listen_on=None, connect_to=None):
+        # one and only one
+        assert (listen_on == None and connect_to != None) or \
+               (listen_on != None and connect_to == None)
+
+        self.skt = socket.socket()
+        self.skt.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        if listen_on != None:
+            self.skt.bind(('127.0.0.1', int(listen_on)))
+            self.skt.listen(1)
+
+        else:
+            self.skt.connect(('127.0.0.1', int(connect_to)))
+
+    def accept(self):
+        s = self.skt.accept()
+        self.skt.shutdown(socket.SHUT_RDWR)
+        self.skt.close()
+
+        self.skt = s[0]
+        self.skt.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+
+    def send(self, msg):
+        #print("1>> ", self.recv_nonblocking())
+        msg = bytes(msg, 'ascii')
+        self.skt.sendall(msg)
+        #print("2>> ", self.recv_nonblocking())
+
+    def recv_nonblocking(self):
+        self.skt.settimeout(0.5)
+        try:
+            return self.skt.recv(2048)
+        except:
+            return b""
+        finally:
+            self.skt.settimeout(None)
+
+    def shutdown(self):
+        self.skt.shutdown(socket.SHUT_RDWR)
+        self.skt.close()
 
