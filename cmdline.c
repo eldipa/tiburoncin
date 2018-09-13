@@ -154,52 +154,54 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *A,
 }
 
 void what(char *argv[]) {
-	printf("tiburoncin\n"
-	       "==========\n"
-	       "\n"
-	       "Small man in the middle tool to inspect the traffic between two endpoints A and B.\n"
-	       "Mostly to be used for students wanting to know what data is flowing in a TCP channel.\n"
-	       "\n"
-	       "Author: %s\n"
-	       "URL: %s\n"
-	       "License: %s\n"
-	       "Version: %s\n"
-	       "\n",
-		TIBURONCIN_AUTHOR, TIBURONCIN_URL,
-		TIBURONCIN_LICENSE, TIBURONCIN_VERSION);
+	printf
+		("tiburoncin\n"
+		 "==========\n"
+		 "\n"
+		 "Small man in the middle tool to inspect the traffic between two endpoints A and B.\n"
+		 "Mostly to be used for students wanting to know what data is flowing in a TCP channel.\n"
+		 "\n"
+		 "Author: %s\n"
+		 "URL: %s\n"
+		 "License: %s\n"
+		 "Version: %s\n"
+		 "\n",
+		 TIBURONCIN_AUTHOR, TIBURONCIN_URL,
+		 TIBURONCIN_LICENSE, TIBURONCIN_VERSION);
 }
 
 void usage(char *argv[]) {
-	printf("%s -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o] [-c]\n"
-	       " where <addr> can be of the form:\n"
-	       "  - host:serv\n"
-	       "  - :serv\n"
-	       "  - serv\n"
-	       " If it is not specified, host will be %s.\n"
-	       " In all the cases the host can be a hostname or an IP;\n"
-	       " for the service it can be a servicename or a port number.\n"
-	       " \n"
-	       " -b <bsz> sets the buffer size of tiburocin\n"
-	       " where <bsz> is a size in bytes of the form:\n"
-	       "  - num      sets the size of both buffers to that value\n"
-	       "  - num:num  sets sizes for A->B and B->A buffers\n"
-	       " by default, both buffers are of %i bytes\n"
-	       " \n"
-	       " -z <bsz> sets the buffer size of the sockets\n"
-	       " where <bsz> is a size in bytes of the form:\n"
-	       "  - num      sets the size of both buffers SND and RCV to that value\n"
-	       "  - num:num  sets sizes for SND and RCV buffers\n"
-	       " by default, both buffers are not changed. See man socket(7)\n"
-	       " \n"
-	       " -o save the received data onto two files:\n"
-	       "  %s for the data received from A\n"
-	       "  %s for the data received from B\n"
-	       " in both cases a raw hexdump is saved which can be recovered later\n"
-	       " running 'xxd -p -c 16 -r <raw hexdump file>'. See man xxd(1)\n"
-	       " \n"
-	       " -c disable the color in the output (colorless)\n",
-	       argv[0], DEFAULT_HOST, DEFAULT_BUF_SIZE,
-			DEFAULT_A_TO_B_DUMPFILENAME, DEFAULT_B_TO_A_DUMPFILENAME);
+	printf
+		("%s -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o] [-c]\n"
+		 " where <addr> can be of the form:\n"
+		 "  - host:serv\n"
+		 "  - :serv\n"
+		 "  - serv\n"
+		 " If it is not specified, host will be %s.\n"
+		 " In all the cases the host can be a hostname or an IP;\n"
+		 " for the service it can be a servicename or a port number.\n"
+		 " \n"
+		 " -b <bsz> sets the buffer size of tiburocin\n"
+		 " where <bsz> is a size in bytes of the form:\n"
+		 "  - num      sets the size of both buffers to that value\n"
+		 "  - num:num  sets sizes for A->B and B->A buffers\n"
+		 " by default, both buffers are of %i bytes\n"
+		 " \n"
+		 " -z <bsz> sets the buffer size of the sockets\n"
+		 " where <bsz> is a size in bytes of the form:\n"
+		 "  - num      sets the size of both buffers SND and RCV to that value\n"
+		 "  - num:num  sets sizes for SND and RCV buffers\n"
+		 " by default, both buffers are not changed. See man socket(7)\n"
+		 " \n"
+		 " -o save the received data onto two files:\n"
+		 "  %s for the data received from A\n"
+		 "  %s for the data received from B\n"
+		 " in both cases a raw hexdump is saved which can be recovered later\n"
+		 " running 'xxd -p -c 16 -r <raw hexdump file>'. See man xxd(1)\n"
+		 " \n"
+		 " -c disable the color in the output (colorless)\n",
+		argv[0], DEFAULT_HOST, DEFAULT_BUF_SIZE,
+		DEFAULT_A_TO_B_DUMPFILENAME, DEFAULT_B_TO_A_DUMPFILENAME);
 }
 
 #undef _POSIX_C_SOURCE

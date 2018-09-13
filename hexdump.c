@@ -5,7 +5,7 @@
 #include <ctype.h>
 
 int hexdump_init(struct hexdump *hd, const char *from, const char *to,
-			const char *color_escape, const char *out_filename) {
+		const char *color_escape, const char *out_filename) {
 	memset(hd, 0, sizeof(*hd));
 	hd->from = from;
 	hd->to = to;
@@ -105,13 +105,13 @@ void hexdump_sent_print(struct hexdump *hd, const char *buf, unsigned int sz) {
 	if (!sz)
 		return;
 
-        if (hd->color_escape)
-            printf("%s", hd->color_escape);
+	if (hd->color_escape)
+		printf("%s", hd->color_escape);
 
 	printf("%s -> %s sent %u bytes\n", hd->from, hd->to, sz);
 
-        if (hd->color_escape)
-            printf("%s", "\x1b[1m"); /* bold */
+	if (hd->color_escape)
+		printf("%s", "\x1b[1m"); /* bold */
 
 	hexdump_print_raw_hex(hd, buf, sz);
 	while (sz > 0) {
@@ -130,14 +130,14 @@ void hexdump_sent_print(struct hexdump *hd, const char *buf, unsigned int sz) {
 		hd->offset += consumed;
 	}
 
-        if (hd->color_escape)
-            printf("%s", "\x1b[0m"); /* reset */
+	if (hd->color_escape)
+		printf("%s", "\x1b[0m"); /* reset */
 	fflush(stdout);
 }
 
 void hexdump_remain_print(struct hexdump *hd, unsigned int sz_consumed) {
-        if (hd->color_escape)
-            printf("%s", hd->color_escape);
+	if (hd->color_escape)
+		printf("%s", hd->color_escape);
 
 	hd->offset_consumer += sz_consumed;
 
@@ -149,8 +149,8 @@ void hexdump_remain_print(struct hexdump *hd, unsigned int sz_consumed) {
 				hd->to, hd->offset - hd->offset_consumer);
 	}
 
-        if (hd->color_escape)
-            printf("%s", "\x1b[0m"); /* reset */
+	if (hd->color_escape)
+		printf("%s", "\x1b[0m"); /* reset */
 	fflush(stdout);
 }
 

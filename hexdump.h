@@ -14,7 +14,7 @@ struct hexdump {
 };
 
 int hexdump_init(struct hexdump *hd, const char *from, const char *to,
-			const char *color_escape, const char out_filename[64]);
+		const char *color_escape, const char out_filename[64]);
 void hexdump_sent_print(struct hexdump *hd, const char *buf, unsigned int sz);
 void hexdump_remain_print(struct hexdump *hd, unsigned int sz);
 void hexdump_destroy(struct hexdump *hd);

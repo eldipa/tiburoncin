@@ -205,7 +205,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	printf("Allocating buffers: %lu and %lu bytes...\n", buf_sizes[0],
-					 			buf_sizes[1]);
+			buf_sizes[1]);
 	struct circular_buffer_t buf_AtoB;
 	if (circular_buffer_init(&buf_AtoB, buf_sizes[0]) != 0) {
 		perror("Buffer allocation for A->B failed");
@@ -242,13 +242,13 @@ int main(int argc, char *argv[]) {
 
 		if (pstatus_AtoB == PIPE_OPEN)
 			pstatus_AtoB = enable_read_write(&A, &B,
-						&rfds, &wfds,
-						&buf_AtoB);
+					&rfds, &wfds,
+					&buf_AtoB);
 
 		if (pstatus_BtoA == PIPE_OPEN)
 			pstatus_BtoA = enable_read_write(&B, &A,
-						&rfds, &wfds,
-						&buf_BtoA);
+					&rfds, &wfds,
+					&buf_BtoA);
 
 
 		if (pstatus_AtoB != PIPE_OPEN && pstatus_BtoA != PIPE_OPEN)
