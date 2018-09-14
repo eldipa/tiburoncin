@@ -14,32 +14,45 @@ $ alias tiburoncin=../tiburoncin
 
 First, we set up our server listening in the given port
 
+```python
 >>> B = netcat(listen_on = <port-b>)        # byexample: +paste
 
-Then we run tiburoncin so he can connect to that port and listen
+```
+
+Then we run ``tiburoncin`` so he can connect to that port and listen
 in a second one
 
-$ tiburoncin -A 127.0.0.1:<port-a> -B 127.0.0.1:<port-b> -c     # byexample: +paste +stop-on-silence
+```shell
+$ tiburoncin -A 127.0.0.1:<port-a> -B 127.0.0.1:<port-b> -c     # byexample: +paste +stop-on-silence +timeout=1
 Connecting to B 127.0.0.1:<port-b>...
 Waiting for a connection from A 127.0.0.1:<port-a>...
 
-And finally we connect our client to tiburoncin
+```
 
+And finally we connect our client to ``tiburoncin``
+
+```python
 >>> A = netcat(connect_to = <port-a>)       # byexample: +paste
 
+```
+
 <!--
-Accpet the connection and close the circuit
+Accept the connection and close the circuit
 >>> B.accept()  # byexample: +fail-fast
 
 -->
 
-Now we can send some data from A to B and/or vice versa
+Now we can send some data from ``A`` to ``B`` and/or vice versa
 
+```python
 >>> A.send("hello\n")
 
-All the bytes sent in one or in the other direction will be recorded
-by tiburoncin acting as a *man in the middle*:
+```
 
+All the bytes sent in one or in the other direction will be recorded
+by ``tiburoncin`` acting as a *man in the middle*:
+
+```shell
 $ fg                                        # byexample: +stop-on-silence +timeout=1
 <...>tiburoncin <...>
 Allocating buffers: 2048 and 2048 bytes...
@@ -48,8 +61,14 @@ A -> B sent 6 bytes
 B is 6 bytes behind
 B is in sync
 
+```
+
+```python
 >>> B.send("hi there!\n")
 
+```
+
+```shell
 $ fg                                        # byexample: +stop-on-silence +timeout=1
 <...>tiburoncin <...>
 B -> A sent 10 bytes
@@ -57,13 +76,19 @@ B -> A sent 10 bytes
 A is 10 bytes behind
 A is in sync
 
-Notice how tiburoncin shows the bytes in hexadecimal and in ASCII like
-hexdump does keeping track of how much bytes were sent.
+```
+
+Notice how ``tiburoncin`` shows the bytes in hexadecimal and in ASCII like
+``hexdump`` does keeping track of how much bytes were sent.
 
 If we keep sending data we will see it more clearly:
 
+```python
 >>> B.send("how are you?\n")
 
+```
+
+```shell
 $ fg                                        # byexample: +stop-on-silence +timeout=1
 <...>tiburoncin <...>
 B -> A sent 13 bytes
@@ -72,17 +97,23 @@ B -> A sent 13 bytes
 A is 13 bytes behind
 A is in sync
 
+```
+
 In the example above, you can see:
 
- - how many bytes were sent at that moment (B -> A sent 13 bytes)
- - and how many bytes were sent before the message (0000000a, 10 bytes)
+ - how many bytes were sent at that moment (``B -> A`` sent 13 bytes)
+ - and how many bytes were sent before the message (``0000000a``, 10 bytes)
  - the hexdump of the message sent
- - for how many bytes the parties are out of sync (A is 13 bytes behind)
- - then, when A reads the message from tiburoncin he gets on sync (A is in sync)
+ - for how many bytes the parties are out of sync (``A`` is 13 bytes behind)
+ - then, when ``A`` reads the message from ``tiburoncin`` he gets on sync (``A`` is in sync)
 
+```python
 >>> A.send("very good, thanks for asking\n")
 >>> B.send("good to hear that, bye\n")
 
+```
+
+```shell
 $ fg                                        # byexample: +stop-on-silence +timeout=1
 <...>tiburoncin <...>
 A -> B sent 29 bytes
@@ -97,15 +128,21 @@ A is 23 bytes behind
 B is in sync
 A is in sync
 
-The above repeats for all the message that A and B share.
+```
+
+The above repeats for all the message that ``A`` and ``B`` share.
 
 Finally, can shutdown the communication
 
+```python
 >>> A.shutdown()                            # byexample: -skip
 >>> B.shutdown()                            # byexample: -skip
 
-And tiburoncin will shutdown gracefully
+```
 
+And ``tiburoncin`` will shutdown gracefully
+
+```shell
 $ fg
 <...>tiburoncin <...>
 A -> B flow shutdown
@@ -115,6 +152,8 @@ A is in sync
 
 $ echo $?
 0
+
+```
 
 <!--
 $ kill %% ; wait                           # byexample: -skip +pass
