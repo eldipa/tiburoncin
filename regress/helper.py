@@ -173,16 +173,20 @@ def dump(proc_or_str, title):
 
 
 class netcat:
-    def __init__(self, listen_on=None, connect_to=None):
+    def __init__(self, listen_on=None, connect_to=None, rcv_buf=2048):
         # one and only one
         assert (listen_on == None and connect_to != None) or \
                (listen_on != None and connect_to == None)
 
         self.skt = socket.socket()
         self.skt.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        self.skt.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, rcv_buf)
+
+        self.flows = [socket.SHUT_RD, socket.SHUT_WR]
         if listen_on != None:
             self.skt.bind(('127.0.0.1', int(listen_on)))
             self.skt.listen(1)
+            self.rcv_buf = rcv_buf
 
         else:
             self.skt.connect(('127.0.0.1', int(connect_to)))
@@ -194,23 +198,38 @@ class netcat:
 
         self.skt = s[0]
         self.skt.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        self.skt.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, self.rcv_buf)
 
     def send(self, msg):
-        #print("1>> ", self.recv_nonblocking())
         msg = bytes(msg, 'ascii')
         self.skt.sendall(msg)
-        #print("2>> ", self.recv_nonblocking())
 
-    def recv_nonblocking(self):
+    def consume(self, n):
+        while n > 0:
+            s = len(self.skt.recv(n))
+            if s > 0:
+                n -= s
+            else:
+                return s
+
+        return None # yes, none
+
+    def recv_nonblocking(self, n=2048):
         self.skt.settimeout(0.5)
         try:
-            return self.skt.recv(2048)
+            return self.skt.recv(n)
         except:
             return b""
         finally:
             self.skt.settimeout(None)
 
-    def shutdown(self):
-        self.skt.shutdown(socket.SHUT_RDWR)
-        self.skt.close()
+    def shutdown(self, how=None):
+        if how == None or how == socket.SHUT_RDWR:
+            for f in self.flows:
+                self.skt.shutdown(f)
+            self.skt.close()
+        else:
+            self.flows.remove(how)
+            self.skt.shutdown(how)
+
 
