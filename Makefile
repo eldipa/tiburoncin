@@ -8,25 +8,19 @@ test: compile
 	make _run_test
 
 memcheck: compile
+	@echo "****************************************"
+	@echo "Not supported yet: when valgrind is stopped (^Z), it seems that interrupt (^C) tiburoncin which breaks the tests."
+	@echo "****************************************"
+	exit 1
 	mv tiburoncin tiburoncin.bin
-	@echo '#!/bin/bash \n valgrind --quiet --leak-check=summary --log-file=valgrind-%p.out ./tiburoncin.bin $$@' > tiburoncin 2>&1
+	@echo '#!/bin/bash \n exec valgrind --quiet --leak-check=summary --log-file=valgrind-%p.out ../tiburoncin.bin $$@' > tiburoncin 2>&1
 	chmod u+x tiburoncin
 	make _run_test
 	mv tiburoncin.bin tiburoncin
 	cat valgrind*.out
 
 _run_test:
-	@echo "Disclaimer"
-	@echo "=========="
-	@echo
-	@echo "The automated tests use a particular version of netcat (nc)"
-	@echo "It is possible that some of the tests fail in your environment."
-	@echo "Unfortunately, I found (too late) that there are too many"
-	@echo "versions of netcat out there to even try to make the tests more"
-	@echo "robusts."
-	@echo
-	@sleep 5
-	@./_test.sh
+	( cd docs ; byexample -l python,shell *.md )
 
 coverage: clean
 	gcc -fprofile-arcs -ftest-coverage ${CODESTD_FLAGS} -o tiburoncin *.c

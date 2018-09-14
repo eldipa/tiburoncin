@@ -17,12 +17,12 @@ First, we run ``tiburoncin`` and the two endpoints as usual
 with one, the reciever, with a small buffer size
 
 ```python
->>> B = netcat(listen_on = <port-b>, rcv_buf=1024)        # byexample: +paste
+>>> B = netcat(listen_on = <port-b>, rcv_buf=1024)        # byexample: +paste +fail-fast
 
 ```
 
 ```shell
-$ tiburoncin -A 127.0.0.1:<port-a> -B 127.0.0.1:<port-b> -c -z 1024:4096 -b 512:2048    # byexample: +paste +stop-on-silence +timeout=1
+$ tiburoncin -A 127.0.0.1:<port-a> -B 127.0.0.1:<port-b> -c -z 1024:4096 -b 512:2048    # byexample: +paste +stop-on-silence +timeout=2
 Connecting to B 127.0.0.1:<port-b>...
 Waiting for a connection from A 127.0.0.1:<port-a>...
 
