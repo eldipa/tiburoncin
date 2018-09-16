@@ -96,7 +96,7 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *A,
 	out_filenames[0] = out_filenames[1] = 0;
 	*colorless = 0;
 
-	while ((opt = getopt(argc, argv, "A:B:b:z:oc")) != -1) {
+	while ((opt = getopt(argc, argv, "A:B:b:z:och")) != -1) {
 		switch (opt) {
 			case 'A':
 				/* A configuration */
@@ -136,6 +136,9 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *A,
 				/* color less */
 				*colorless = 1;
 				break;
+
+			case 'h':
+				return ret;
 
 			default:
 				fprintf(stderr, "Unknown argument.\n");
