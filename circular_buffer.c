@@ -6,7 +6,7 @@
 int circular_buffer_init(struct circular_buffer_t *b, size_t sz) {
 	memset(b, 0, sizeof(*b));
 	b->sz = sz;
-	b->buf = malloc(sz);
+	b->buf = (char*)malloc(sz);
 	if (!b->buf)
 		return -1;
 
