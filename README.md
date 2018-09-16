@@ -8,22 +8,23 @@ Mostly to be used for students wanting to know what data is flowing in a TCP cha
 First, run the "server"
 
 ```shell
-nc -l -p 8082 127.0.0.1
+nc -l -p 8082 127.0.0.1                              # byexample: +skip
 ```
 
-Then start `tiburoncin`
+Then start ``tiburoncin``
 
 ```shell
-./tiburoncin -A 127.0.0.1:8081 -B 127.0.0.1:8082
+./tiburoncin -A 127.0.0.1:8081 -B 127.0.0.1:8082     # byexample: +skip
 ```
 
 And finally start the "client"
 
 ```shell
-nc 127.0.0.1 8081
+nc 127.0.0.1 8081                                    # byexample: +skip
 ```
 
-Use your server/client as you wish, all the traffic flowing in the channel will be captured and displayed by `tiburoncin`.
+Use your server/client as you wish, all the traffic flowing in
+the channel will be captured and displayed by ``tiburoncin``.
 
 The following diagram depicts what's going on:
 
@@ -65,8 +66,20 @@ B is in sync
 
 ### Help
 
-```
-./tiburoncin -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o]
+```shell
+$ ./tiburoncin -h                             # byexample: -tag +rm=~ +norm-ws
+tiburoncin
+==========
+~
+Small man in the middle tool to inspect the traffic between two endpoints A and B.
+Mostly to be used for students wanting to know what data is flowing in a TCP channel.
+~
+Author: Martin Di Paola
+URL: https://github.com/eldipa/tiburoncin
+License: GPLv3
+Version: 2.1.0
+~
+./tiburoncin -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o] [-c]
  where <addr> can be of the form:
   - host:serv
   - :serv
@@ -74,38 +87,45 @@ B is in sync
  If it is not specified, host will be localhost.
  In all the cases the host can be a hostname or an IP;
  for the service it can be a servicename or a port number.
-
+~
  -b <bsz> sets the buffer size of tiburocin
  where <bsz> is a size in bytes of the form:
   - num      sets the size of both buffers to that value
   - num:num  sets sizes for A->B and B->A buffers
  by default, both buffers are of 2048 bytes
-
+~
  -z <bsz> sets the buffer size of the sockets
  where <bsz> is a size in bytes of the form:
   - num      sets the size of both buffers SND and RCV to that value
   - num:num  sets sizes for SND and RCV buffers
  by default, both buffers are not changed. See man socket(7)
-
+~
  -o save the received data onto two files:
   AtoB.dump for the data received from A
   BtoA.dump for the data received from B
  in both cases a raw hexdump is saved which can be recovered later
  running 'xxd -p -c 16 -r <raw hexdump file>'. See man xxd(1)
+~
+ -c disable the color in the output (colorless)
+
 ```
 
 ## How to compile it
 
-You will need `make` and `gcc` with support for `c99`. Then just run:
+You will need ``make`` and ``gcc`` with support for ``c99``. Then just run:
 
 ```shell
-make compile
+make compile                           # byexample: +skip
 ```
 
 ### Run the tests
 
+For this you will need [python](https://www.python.org/downloads/),
+[cling](https://github.com/root-project/cling) and
+[byexample](https://byexamples.github.io/byexample/).
+
 ```shell
-make test
+make test                              # byexample: +skip
 ```
 
 ## How to contribute
