@@ -5,7 +5,7 @@ compile:
 	chmod u+x tiburoncin
 
 test: compile
-	make _run_test
+	@make _run_test
 
 memcheck: compile
 	@echo "****************************************"
@@ -19,8 +19,16 @@ memcheck: compile
 	mv tiburoncin.bin tiburoncin
 	cat valgrind*.out
 
-_run_test:
+_run_test: test-doc test-circular-buffer
+
+test-doc:
+	@hash byexample || if true; then echo "byexample is not installed, install it with 'pip install byexample', see https://byexamples.github.io/byexample/" ; exit 1; fi
 	( cd docs ; byexample -l python,shell *.md )
+
+test-circular-buffer:
+	@hash byexample || if true; then echo "byexample is not installed, install it with 'pip install byexample', see https://byexamples.github.io/byexample/" ; exit 1; fi
+	@hash cling || if true; then echo "cling is not installed, see https://github.com/root-project/cling" ; exit 1; fi
+	byexample -l cpp circular_buffer.h
 
 coverage: clean
 	gcc -fprofile-arcs -ftest-coverage ${CODESTD_FLAGS} -o tiburoncin *.c
