@@ -18,11 +18,11 @@ void circular_buffer_destroy(struct circular_buffer_t *b) {
 }
 
 size_t circular_buffer_get_free(struct circular_buffer_t *b) {
-	return b->full? (b->tail - b->head) : (b->sz - b->head);
+	return b->hbehind? (b->tail - b->head) : (b->sz - b->head);
 }
 
 size_t circular_buffer_get_ready(struct circular_buffer_t *b) {
-	return b->full? (b->sz - b->tail) : (b->head - b->tail);
+	return b->hbehind? (b->sz - b->tail) : (b->head - b->tail);
 }
 
 void circular_buffer_advance_head(struct circular_buffer_t *b, size_t s) {
@@ -30,7 +30,7 @@ void circular_buffer_advance_head(struct circular_buffer_t *b, size_t s) {
 	b->head += s;
 	if (b->head == b->sz) {
 		b->head = 0;
-		b->full = true;
+		b->hbehind = true;
 	}
 }
 
@@ -39,6 +39,6 @@ void circular_buffer_advance_tail(struct circular_buffer_t *b, size_t s) {
 	b->tail += s;
 	if (b->tail == b->sz) {
 		b->tail = 0;
-		b->full = false;
+		b->hbehind = false;
 	}
 }

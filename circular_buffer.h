@@ -9,7 +9,7 @@ struct circular_buffer_t {
 	char *buf;
 	size_t head;
 	size_t tail;
-	bool full;
+	bool hbehind;
 	size_t sz;
 };
 
