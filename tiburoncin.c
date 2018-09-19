@@ -7,8 +7,6 @@
 #include <unistd.h>
 #include <sys/socket.h>
 
-#include <signal.h>
-
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -21,9 +19,9 @@
 #include "cmdline.h"
 #include "circular_buffer.h"
 
-#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#include "signal.h"
 
-int interrupted = 0;
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer,
 		fd_set *rfds, fd_set *wfds,
@@ -204,9 +202,9 @@ int main(int argc, char *argv[]) {
 		return ret;
 	}
 
-	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR) {
-		perror("Ignore broken pipe signal failed");
-		goto ign_epipe_signal_failed;
+	if (setup_signal_handlers() != 0) {
+		perror("Setup signal handlers failed");
+		goto setup_signal_handlers_failed;
 	}
 
 	/* disable the colors? */
@@ -320,6 +318,6 @@ wait_conn_failed:
 	shutdown_and_close(&B);
 
 establish_conn_failed:
-ign_epipe_signal_failed:
+setup_signal_handlers_failed:
 	return ret;
 }
