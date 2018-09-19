@@ -319,5 +319,5 @@ wait_conn_failed:
 
 establish_conn_failed:
 setup_signal_handlers_failed:
-	return ret;
+	return interrupted?  128 + interrupted : ret;
 }
