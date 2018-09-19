@@ -1,4 +1,4 @@
-#define _POSIX_C_SOURCE 9999999
+#define _POSIX_C_SOURCE 200112L
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -251,5 +251,3 @@ void shutdown_and_close(struct endpoint *p) {
 	} while (s == -1 && errno == EINTR && !interrupted);
 }
 
-
-#undef _POSIX_C_SOURCE

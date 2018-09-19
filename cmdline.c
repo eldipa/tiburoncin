@@ -1,5 +1,4 @@
-
-#define _POSIX_C_SOURCE 9999999
+#define _POSIX_C_SOURCE 200112L
 
 #include <unistd.h>
 

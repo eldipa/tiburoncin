@@ -1,3 +1,5 @@
+#define _POSIX_C_SOURCE 200112L
+
 #include <sys/select.h>
 
 #include <sys/time.h>
