@@ -14,6 +14,7 @@
 
 #define DEFAULT_BACKLOG 1
 
+extern int interrupted;
 
 /*
  * Given a hostname and servicename in the endpoint p,
@@ -115,7 +116,9 @@ int set_listening(struct endpoint *A, size_t skt_buf_sizes[2]) {
 
 		/* bad */
 		last_errno = errno;
-		close(fd);
+		do {
+			s = close(fd);
+                } while (s == -1 && errno == EINTR && !interrupted);
 	}
 
 	freeaddrinfo(result);
@@ -140,20 +143,26 @@ resolv_failed:
  * */
 int wait_for_connection(struct endpoint *A, size_t skt_buf_sizes[2]) {
 	int ret = -1;
+	int s = -1;
 
 	if (set_listening(A, skt_buf_sizes) == -1)
 		goto listening_failed;
 
 	int passive_fd = A->fd;
-	int peerfd = accept(passive_fd, NULL, NULL);
-	if (peerfd > 0) {
-		A->fd = peerfd;
+	do {
+		s = accept(passive_fd, NULL, NULL);
+        } while (s == -1 && errno == EINTR && !interrupted);
+
+	if (s != -1) {
+		A->fd = s;
 		A->eof = 0;
 		ret = 0;
 	}
 
 	shutdown(passive_fd, SHUT_RDWR);
-	close(passive_fd);
+	do {
+		s = close(passive_fd);	// TODO error is ignored
+        } while (s == -1 && errno == EINTR && !interrupted);
 
 listening_failed:
 	return ret;
@@ -196,7 +205,9 @@ int establish_connection(struct endpoint *B, size_t skt_buf_sizes[2]) {
 
 		/* bad */
 		last_errno = errno;
-		close(fd);
+		do {
+			s = close(fd);
+                } while (s == -1 && errno == EINTR && !interrupted);
 	}
 
 	freeaddrinfo(result);
@@ -228,13 +239,16 @@ int is_write_eof(struct endpoint *p) {
 
 #include <syslog.h>
 void shutdown_and_close(struct endpoint *p) {
+	int s;
 	if (!is_read_eof(p))
 		partial_shutdown(p, SHUT_RD);
 
 	if (!is_write_eof(p))
 		partial_shutdown(p, SHUT_WR);
 
-	close(p->fd);
+	do {
+		s = close(p->fd);
+	} while (s == -1 && errno == EINTR && !interrupted);
 }
 
 

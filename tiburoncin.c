@@ -21,6 +21,8 @@
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
+int interrupted = 0;
+
 int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer,
 		fd_set *rfds, fd_set *wfds,
 		struct circular_buffer_t *b,
@@ -30,7 +32,10 @@ int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer,
 	int s;
 
 	if (FD_ISSET(producer, rfds)) {	 // ready to produce
-		s = read(producer, &b->buf[b->head], circular_buffer_get_free(b));
+		do {
+			s = read(producer, &b->buf[b->head], circular_buffer_get_free(b));
+                } while (s == -1 && errno == EINTR && !interrupted);
+
 		if (s < 0)
 			return -1;
 
@@ -49,7 +54,10 @@ int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer,
 	}
 
 	if (FD_ISSET(consumer, wfds)) {	 // ready to consume
-		s = write(consumer, &b->buf[b->tail], circular_buffer_get_ready(b));
+		do {
+			s = write(consumer, &b->buf[b->tail], circular_buffer_get_ready(b));
+                } while (s == -1 && errno == EINTR && !interrupted);
+
 		if (s < 0)
 			return -1;
 
@@ -269,7 +277,10 @@ int main(int argc, char *argv[]) {
 				  A to B nor B to A. */
 
 
-		s = select(nfds, &rfds, &wfds, NULL, NULL);
+		do {
+			s = select(nfds, &rfds, &wfds, NULL, NULL);
+                } while (s == -1 && errno == EINTR && !interrupted);
+
 		if (s == -1) {
 			perror("select call failed");
 			goto passthrough_failed;
