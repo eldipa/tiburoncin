@@ -274,6 +274,11 @@ int main(int argc, char *argv[]) {
 		goto hd_B_to_A_failed;
 	}
 
+	if (set_nonblocking(&A) != 0 || set_nonblocking(&B) != 0) {
+		perror("Set nonblocking mode failed");
+		goto set_nonblocking_failed;
+	}
+
 	int nfds = MAX(A.fd, B.fd) + 1;
 	fd_set rfds, wfds;
 
@@ -321,6 +326,7 @@ int main(int argc, char *argv[]) {
 	ret = 0;
 
 passthrough_failed:
+set_nonblocking_failed:
 	hexdump_destroy(&hd_BtoA);
 
 hd_B_to_A_failed:
