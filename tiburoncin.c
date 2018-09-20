@@ -32,9 +32,7 @@ int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer,
 	int s;
 
 	if (FD_ISSET(producer, rfds)) {	 // ready to produce
-		do {
-			s = read(producer, &b->buf[b->head], circular_buffer_get_free(b));
-                } while (s == -1 && errno == EINTR && !interrupted);
+		EINTR_RETRY(read(producer, &b->buf[b->head], circular_buffer_get_free(b)));
 
 		if (s < 0) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -75,9 +73,7 @@ int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer,
 read_would_block:
 
 	if (FD_ISSET(consumer, wfds)) {	 // ready to consume
-		do {
-			s = write(consumer, &b->buf[b->tail], circular_buffer_get_ready(b));
-                } while (s == -1 && errno == EINTR && !interrupted);
+		EINTR_RETRY(write(consumer, &b->buf[b->tail], circular_buffer_get_ready(b)));
 
 		if (s < 0) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -304,9 +300,7 @@ int main(int argc, char *argv[]) {
 				  A to B nor B to A. */
 
 
-		do {
-			s = select(nfds, &rfds, &wfds, NULL, NULL);
-                } while (s == -1 && errno == EINTR && !interrupted);
+		EINTR_RETRY(select(nfds, &rfds, &wfds, NULL, NULL));
 
 		if (s == -1) {
 			perror("select call failed");

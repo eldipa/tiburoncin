@@ -11,10 +11,9 @@
 
 #include "endpoint.h"
 #include "socket.h"
+#include "signal.h"
 
 #define DEFAULT_BACKLOG 1
-
-extern int interrupted;
 
 /*
  * Given a hostname and servicename in the endpoint p,
@@ -116,9 +115,7 @@ int set_listening(struct endpoint *A, size_t skt_buf_sizes[2]) {
 
 		/* bad */
 		last_errno = errno;
-		do {
-			s = close(fd);
-                } while (s == -1 && errno == EINTR && !interrupted);
+		EINTR_RETRY(close(fd));
 	}
 
 	freeaddrinfo(result);
@@ -149,9 +146,7 @@ int wait_for_connection(struct endpoint *A, size_t skt_buf_sizes[2]) {
 		goto listening_failed;
 
 	int passive_fd = A->fd;
-	do {
-		s = accept(passive_fd, NULL, NULL);
-        } while (s == -1 && errno == EINTR && !interrupted);
+	EINTR_RETRY(accept(passive_fd, NULL, NULL));
 
 	if (s != -1) {
 		A->fd = s;
@@ -160,9 +155,7 @@ int wait_for_connection(struct endpoint *A, size_t skt_buf_sizes[2]) {
 	}
 
 	shutdown(passive_fd, SHUT_RDWR);
-	do {
-		s = close(passive_fd);	// TODO error is ignored
-        } while (s == -1 && errno == EINTR && !interrupted);
+	EINTR_RETRY(close(passive_fd));	// TODO error is ignored
 
 listening_failed:
 	return ret;
@@ -200,14 +193,14 @@ int establish_connection(struct endpoint *B, size_t skt_buf_sizes[2]) {
 			continue;
 		}
 
-		if (connect(fd, rp->ai_addr, rp->ai_addrlen) != -1)
+		EINTR_RETRY(connect(fd, rp->ai_addr, rp->ai_addrlen));
+
+		if (s != -1)
 			break;	/* good */
 
 		/* bad */
 		last_errno = errno;
-		do {
-			s = close(fd);
-                } while (s == -1 && errno == EINTR && !interrupted);
+		EINTR_RETRY(close(fd));
 	}
 
 	freeaddrinfo(result);
@@ -246,8 +239,6 @@ void shutdown_and_close(struct endpoint *p) {
 	if (!is_write_eof(p))
 		partial_shutdown(p, SHUT_WR);
 
-	do {
-		s = close(p->fd);
-	} while (s == -1 && errno == EINTR && !interrupted);
+	EINTR_RETRY(close(p->fd));
 }
 
