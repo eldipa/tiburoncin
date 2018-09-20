@@ -141,13 +141,17 @@ resolv_failed:
 int wait_for_connection(struct endpoint *A, size_t skt_buf_sizes[2]) {
 	int ret = -1;
 	int s = -1;
+	int last_errno = 0;
 
-	if (set_listening(A, skt_buf_sizes) == -1)
+	if (set_listening(A, skt_buf_sizes) == -1) {
+		last_errno = errno;
 		goto listening_failed;
+	}
 
 	int passive_fd = A->fd;
 	EINTR_RETRY(accept(passive_fd, NULL, NULL));
 
+	last_errno = errno;
 	if (s != -1) {
 		A->fd = s;
 		A->eof = 0;
@@ -158,6 +162,7 @@ int wait_for_connection(struct endpoint *A, size_t skt_buf_sizes[2]) {
 	EINTR_RETRY(close(passive_fd));	// TODO error is ignored
 
 listening_failed:
+	errno = last_errno;
 	return ret;
 }
 
