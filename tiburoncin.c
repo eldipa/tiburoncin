@@ -36,20 +36,6 @@ int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer,
 
 		if (s < 0) {
 			if (errno == EAGAIN || errno == EWOULDBLOCK) {
-				/* Despite that we use some sort of select/poll
-				 * multiplexer the read/write it could block.
-				 *
-				 * For example, if the fd is a socket and it
-				 * receives data, that would mark it "ready for
-				 * reading" but if the packet received is corrupt,
-				 * it will be dicarded and the read call will
-				 * block because there is not more data.
-				 *
-				 * To workaround this, the fd must have the
-				 * O_NONBLOCK flag.
-				 *
-				 * See select(2).
-				 * */
 				FD_CLR(producer, rfds);
 				goto read_would_block;
 			}
@@ -274,6 +260,17 @@ int main(int argc, char *argv[]) {
 		goto hd_B_to_A_failed;
 	}
 
+	/* Despite that we use some sort of select/poll multiplexer
+	 * the read/write it could block.
+	 *
+	 * For example, if the fd is a socket and it receives data,
+	 * that would mark it "ready for reading" but if the packet
+	 * received is corrupted, it will be discarded and the read call will
+	 * block because there is not more data.
+	 *
+	 * To workaround this, the fd must have the O_NONBLOCK flag.
+	 * See select(2).
+	 * */
 	if (set_nonblocking(&A) != 0 || set_nonblocking(&B) != 0) {
 		perror("Set nonblocking mode failed");
 		goto set_nonblocking_failed;
