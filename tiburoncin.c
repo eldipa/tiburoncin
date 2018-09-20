@@ -36,10 +36,29 @@ int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer,
 			s = read(producer, &b->buf[b->head], circular_buffer_get_free(b));
                 } while (s == -1 && errno == EINTR && !interrupted);
 
-		if (s < 0)
-			return -1;
+		if (s < 0) {
+			if (errno == EAGAIN || errno == EWOULDBLOCK) {
+				/* Despite that we use some sort of select/poll
+				 * multiplexer the read/write it could block.
+				 *
+				 * For example, if the fd is a socket and it
+				 * receives data, that would mark it "ready for
+				 * reading" but if the packet received is corrupt,
+				 * it will be dicarded and the read call will
+				 * block because there is not more data.
+				 *
+				 * To workaround this, the fd must have the
+				 * O_NONBLOCK flag.
+				 *
+				 * See select(2).
+				 * */
+				FD_CLR(producer, rfds);
+				goto read_would_block;
+			}
 
-		if (s == 0) {
+			return -1;
+		}
+		else if (s == 0) {
 			/* ack to the other end that we received the shutdown */
 			partial_shutdown(ep_producer, SHUT_RD);
 			hexdump_shutdown_print(hd);
@@ -53,15 +72,22 @@ int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer,
 		circular_buffer_advance_head(b, s);
 	}
 
+read_would_block:
+
 	if (FD_ISSET(consumer, wfds)) {	 // ready to consume
 		do {
 			s = write(consumer, &b->buf[b->tail], circular_buffer_get_ready(b));
                 } while (s == -1 && errno == EINTR && !interrupted);
 
-		if (s < 0)
-			return -1;
+		if (s < 0) {
+			if (errno == EAGAIN || errno == EWOULDBLOCK) {
+				FD_CLR(consumer, wfds);
+				goto write_would_block;
+			}
 
-		if (s == 0) {
+			return -1;
+		}
+		else if (s == 0) {
 			/* ack to the other end that we received the shutdown */
 			partial_shutdown(ep_consumer, SHUT_WR);
 			hexdump_shutdown_print(hd);
@@ -80,6 +106,7 @@ int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer,
 		hexdump_remain_print(hd, 0);
 	}
 
+write_would_block:
 	return 0;
 }
 
