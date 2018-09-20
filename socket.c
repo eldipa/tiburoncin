@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include <errno.h>
 #include <stdio.h>
@@ -220,6 +221,10 @@ int establish_connection(struct endpoint *B, size_t skt_buf_sizes[2]) {
 resolv_failed:
 	return ret;
 
+}
+
+int set_nonblocking(struct endpoint *p) {
+	return fcntl(p->fd, F_SETFL, O_NONBLOCK);
 }
 
 void partial_shutdown(struct endpoint *p, int direction) {

@@ -31,6 +31,12 @@ int establish_connection(struct endpoint *B, size_t skt_buf_sizes[2]);
  * */
 void shutdown_and_close(struct endpoint *p);
 
+/*
+ * Set the socket as non blocking.
+ * On error, return -1 and errno is set appropriately; 0 otherwise.
+ * */
+int set_nonblocking(struct endpoint *p);
+
 
 void partial_shutdown(struct endpoint *p, int direction);
 int is_read_eof(struct endpoint *p);
