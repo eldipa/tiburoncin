@@ -224,7 +224,11 @@ resolv_failed:
 }
 
 int set_nonblocking(struct endpoint *p) {
-	return fcntl(p->fd, F_SETFL, O_NONBLOCK);
+	int flags = fcntl(p->fd, F_GETFL);
+	if (flags == -1)
+		return -1;
+
+	return fcntl(p->fd, F_SETFL, flags | O_NONBLOCK);
 }
 
 void partial_shutdown(struct endpoint *p, int direction) {
