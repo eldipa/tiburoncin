@@ -203,6 +203,7 @@ int main(int argc, char *argv[]) {
 	const char *out_filenames[2] = {0, 0};
 	const char *colors[2] = {"\x1b[91m", "\x1b[94m"};
 	int colorless = 0;
+	sigset_t sigs_allowed;
 
 	if (parse_cmd_line(argc, argv, &A, &B, buf_sizes, skt_buf_sizes,
 				out_filenames, &colorless)) {
@@ -211,9 +212,19 @@ int main(int argc, char *argv[]) {
 		return ret;
 	}
 
+	if (block_all_signals() != 0) {
+		perror("Block all signals failed");
+		goto setup_signal_failed;
+	}
+
 	if (setup_signal_handlers() != 0) {
 		perror("Setup signal handlers failed");
-		goto setup_signal_handlers_failed;
+		goto setup_signal_failed;
+	}
+
+	if (initialize_allowed_sigset(&sigs_allowed) != 0) {
+		perror("Initialize allowed signal set failed");
+		goto setup_signal_failed;
 	}
 
 	/* disable the colors? */
@@ -302,7 +313,7 @@ int main(int argc, char *argv[]) {
 				  A to B nor B to A. */
 
 
-		EINTR_RETRY(select(nfds, &rfds, &wfds, NULL, NULL));
+		EINTR_RETRY(pselect(nfds, &rfds, &wfds, NULL, NULL, &sigs_allowed));
 
 		if (s == -1) {
 			perror("select call failed");
@@ -342,6 +353,6 @@ wait_conn_failed:
 	shutdown_and_close(&B);
 
 establish_conn_failed:
-setup_signal_handlers_failed:
+setup_signal_failed:
 	return interrupted?  128 + interrupted : ret;
 }

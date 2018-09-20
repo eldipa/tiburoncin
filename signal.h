@@ -1,6 +1,8 @@
 #ifndef SIGNAL_H_
 #define SIGNAL_H_
 
+#include <signal.h>
+
 /*
  * Global variable (initialized to 0) that signals
  * when the program was interrupted by the user and
@@ -47,16 +49,40 @@ extern int interrupted;
                 } while (s == -1 && errno == EINTR && !interrupted)
 
 /*
+ * Block all the signals except:
+ *	- SIGBUS, SIGFPE, SIGILL and SIGSEGV (the behaviour is undefined
+ *	if we block one of those, see sigprocmask(2)).
+ *	- SIGTSTP, SIGTTIN, SIGTTOU and SIGCONT (they are used for job and
+ *	terminal control, see signal(7))
+ *	- SIGKILL and SIGSTOP (they are not blocked anyway, see sigprocmask(2))
+ *
+ * On error, return -1 and errno is set appropriately; return 0 on success.
+ * */
+int block_all_signals();
+
+/*
  * Setup the signal handlers:
  *	- SIGINT (Interrupt / Ctrl-C): set interrupted variable to nonzero
  *	- SIGTERM (Termination): set interrupted variable to nonzero
  *	- SIGPIPE (Broken Pipe): ignore the signal
  *
- * Other signals are left to their default handlers.
+ * Other signals are left to their default handlers. See signal(7).
  *
  * On error, return -1 and errno is set appropriately; return 0 on success.
  *
  * */
 int setup_signal_handlers();
+
+/*
+ * Initialize a signal set (mask) to unblock SIGINT, SIGTERM and SIGPIPE.
+ *
+ * It is the mask generated from the block_all_signals() set minus the
+ * signals with handlers defined by setup_signal_handlers().
+ *
+ * On error, return -1 and errno is set appropriately; return 0 on success.
+ *
+ * Note: on error, the value of *set is undefined.
+ * */
+int initialize_allowed_sigset(sigset_t *set);
 
 #endif

@@ -13,6 +13,34 @@ static void int_handler(int signum) {
 		interrupted = signum;
 }
 
+static int initialize_block_all_sigset(sigset_t *set) {
+	if (sigfillset(set) != -1 \
+			&& sigdelset(set, SIGBUS) != -1  \
+			&& sigdelset(set, SIGFPE) != -1  \
+			&& sigdelset(set, SIGILL) != -1  \
+			&& sigdelset(set, SIGSEGV) != -1 \
+			&& sigdelset(set, SIGCONT) != -1 \
+			&& sigdelset(set, SIGTSTP) != -1 \
+			&& sigdelset(set, SIGTTIN) != -1 \
+			&& sigdelset(set, SIGTTOU) != -1) {
+		return 0;
+	}
+	else {
+		return -1;
+	}
+}
+
+int block_all_signals() {
+	sigset_t set;
+	if (initialize_block_all_sigset(&set) != -1 \
+			&& sigprocmask(SIG_SETMASK, &set, 0) != -1) {
+		return 0;
+	}
+	else {
+		return -1;
+	}
+}
+
 int setup_signal_handlers() {
 	struct sigaction sa;
 	sigfillset(&sa.sa_mask); /* do not interrupt a sig handler */
@@ -30,4 +58,16 @@ int setup_signal_handlers() {
 		return -1;
 
 	return 0;
+}
+
+int initialize_allowed_sigset(sigset_t *set) {
+	if (initialize_block_all_sigset(set) != -1 \
+			    && sigdelset(set, SIGINT) != -1 \
+			    && sigdelset(set, SIGTERM) != -1 \
+			    && sigdelset(set, SIGPIPE) != -1) {
+		return 0;
+	}
+	else {
+		return -1;
+	}
 }
