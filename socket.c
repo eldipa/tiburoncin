@@ -44,8 +44,9 @@ int resolv(struct endpoint *p, struct addrinfo **result) {
 		fprintf(stderr, "Address resolution failed for %s:%s: %s\n",
 				p->host, p->serv, gai_strerror(s));
 
-		errno = EADDRNOTAVAIL; /* quite arbitrary as it is not easy
-					  to map a gai error into a errno */
+		if (s != EAI_SYSTEM)
+			errno = EADDRNOTAVAIL; /* quite arbitrary as it is not easy
+						  to map a gai error into a errno */
 
 		return -1;
 	}
@@ -331,7 +332,7 @@ int establish_connection(struct endpoint *B, size_t skt_buf_sizes[2],
 		s = resolv(B, &result);
 		if (s != 0) {
 			last_errno = errno;
-			goto resolv_failed;
+			result = NULL;
 		}
 
 		for (rp = result; rp != NULL; rp = rp->ai_next) {
@@ -354,7 +355,9 @@ int establish_connection(struct endpoint *B, size_t skt_buf_sizes[2],
 			}
 		}
 
-		freeaddrinfo(result);
+		if (result != NULL)
+			freeaddrinfo(result);
+
 		if (rp == NULL && --remain > 0) {
 			struct timespec t = {
 				.tv_sec  = CONNECT_WAIT_TRY_SECS,
@@ -371,7 +374,6 @@ int establish_connection(struct endpoint *B, size_t skt_buf_sizes[2],
 		ret = 0;
 	}
 
-resolv_failed:
 	errno = last_errno;
 	return ret;
 
