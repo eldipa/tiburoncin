@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <sys/select.h>
+
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -47,6 +49,19 @@ int resolv(struct endpoint *p, struct addrinfo **result) {
 	else {
 		return 0;
 	}
+}
+
+/*
+ * Set the socket as non blocking.
+ * On error, return -1 and errno is set appropriately; 0 otherwise.
+ * */
+static
+int set_nonblocking(int fd) {
+	int flags = fcntl(fd, F_GETFL);
+	if (flags == -1)
+		return -1;
+
+	return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
 static
@@ -100,23 +115,18 @@ int set_listening(struct endpoint *A, size_t skt_buf_sizes[2]) {
 			continue;
 		}
 
-		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) == -1) {
-			last_errno = errno;
-			continue;
+		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) != -1
+				&& set_socket_buffer_sizes(fd, skt_buf_sizes) != -1
+				&& set_nonblocking(fd) != -1
+				&& bind(fd, rp->ai_addr, rp->ai_addrlen) != -1
+				&& listen(fd, DEFAULT_BACKLOG) != -1) {
+			break;	/* good */
 		}
-
-		if (set_socket_buffer_sizes(fd, skt_buf_sizes) != 0) {
+		else {
+			/* bad */
 			last_errno = errno;
-			continue;
+			EINTR_RETRY(close(fd));
 		}
-
-		if (bind(fd, rp->ai_addr, rp->ai_addrlen) == 0)
-			if (listen(fd, DEFAULT_BACKLOG) == 0)
-				break;	/* good */
-
-		/* bad */
-		last_errno = errno;
-		EINTR_RETRY(close(fd));
 	}
 
 	freeaddrinfo(result);
@@ -127,19 +137,144 @@ int set_listening(struct endpoint *A, size_t skt_buf_sizes[2]) {
 		ret = 0;
 	}
 
-
 resolv_failed:
 	return ret;
 }
 
 /*
+ * Connect to socket fd to the destination described in rp.
+ * This virtually works like the connect syscall (see connect(2)) but allows
+ * to set a signal mask before blocking atomically.
+ *
+ * Note: the file descriptor must have the O_NONBLOCK flag set
+ * (non blocking mode, see fcntl(2))
+ *
+ * Return -1 on error, (errno is set appropriately) 0 on success.
+ *
+ * Note: this function may fail under different circumstances which may
+ * produce the same error number (errno) due different causes:
+ *  - the connect syscall could fail
+ *  - the pselect syscall could fail
+ *  - the getsockopt could fail (used to get the status of the connection)
+ *  - the connection could fail
+ **/
+static
+int pconnect(int fd, struct addrinfo *rp, sigset_t *set) {
+	int s;
+	EINTR_RETRY(connect(fd, rp->ai_addr, rp->ai_addrlen));
+
+	/*
+	 * The connection failed, and failed quickly. We should fail too.
+	 * */
+	if (s == -1 && errno != EINPROGRESS)
+		return -1;
+
+	/*
+	 * The connection was established quickly, we are done.
+	 * */
+	if (s != -1)
+		return 0;
+
+	/*
+	 * The connection didn't fail but it is still in progress,
+	 * so wait for it.
+	 * See connect(2)
+	 * */
+	fd_set wfds;
+	FD_ZERO(&wfds);
+	FD_SET(fd, &wfds);
+
+	EINTR_RETRY(pselect(fd + 1, NULL, &wfds, NULL, NULL, set));
+
+	/*
+	 * The wait failed, we should fail too.
+	 * */
+	if (s == -1)
+		return -1;
+
+	/*
+	 * See if the connection succeed or not.
+	 * See socket(7)
+	 * */
+	int val = -1;
+	size_t vlen = sizeof(val);
+	s = getsockopt(fd, SOL_SOCKET, SO_ERROR, (void*)&val, (void*)&vlen);
+
+	/*
+	 * We couldn't retrieved the socket error (if any), fail.
+	 * */
+	if (s == -1)
+		return -1;
+
+	if (val != 0) {
+		errno = val; /* TODO Is it possible that val == EAGAIN/EWOULDBLOCK/EINPROGRESS like in the accept? */
+		return -1;
+	}
+
+	/*
+	 * The connection was established, hurra!
+	 * */
+	return 0;
+}
+
+/*
+ * Accept a new connection to passive_fd.
+ * This virtually works like the accept syscall (see accept(2)) but
+ * in addition allows to set the signal mask set before blocking atomically.
+ *
+ * Note: the file descriptor must have the O_NONBLOCK flag set
+ * (non blocking mode, see fcntl(2))
+ *
+ * If the function succeeds, the returned file descriptor will also have
+ * the O_NONBLOCK flag.
+ *
+ * Return -1 on error, (errno is set appropriately), otherwise return
+ * a new file descriptor that represents the other endpoint of the
+ * connection.
+ *
+ * Note: this function may fail under different circumstances which may
+ * produce the same error number (errno) due different causes:
+ *  - the pselect syscall could fail
+ *  - the accept syscall could fail
+ * */
+static
+int paccept(int passive_fd, sigset_t *set) {
+	int s = -1;
+
+	fd_set rfds;
+	do {
+		FD_ZERO(&rfds);
+		FD_SET(passive_fd, &rfds);
+		EINTR_RETRY(pselect(passive_fd + 1, &rfds, NULL, NULL, NULL, set));
+
+		/* select failed, we cannot do much more, fail too. */
+		if (s == -1)
+			return -1;
+
+		EINTR_RETRY(accept(passive_fd, NULL, NULL));
+
+		/* accept failed and it is not due a false positive read event
+		 * (in those cases, the accept syscall "would block")
+		 * Fail directly.
+		 * */
+		if (s == -1 && errno != EAGAIN && errno != EWOULDBLOCK)
+			return -1;
+
+	} while(s == -1);
+
+	return s; // new file descriptor
+}
+
+/*
  * Wait for a connection on host:serv given in the endpoint A.
+ * During the wait, set the signal mask set atomically before blocking.
  *
  * Save the file descriptor of the peer socket if it succeeds into A
  * and return 0.
  * On error, return -1 and errno is set appropriately.
  * */
-int wait_for_connection(struct endpoint *A, size_t skt_buf_sizes[2]) {
+int wait_for_connection(struct endpoint *A, size_t skt_buf_sizes[2],
+		sigset_t *set) {
 	int ret = -1;
 	int s = -1;
 	int last_errno = 0;
@@ -150,15 +285,27 @@ int wait_for_connection(struct endpoint *A, size_t skt_buf_sizes[2]) {
 	}
 
 	int passive_fd = A->fd;
-	EINTR_RETRY(accept(passive_fd, NULL, NULL));
-
-	last_errno = errno;
-	if (s != -1) {
-		A->fd = s;
-		A->eof = 0;
-		ret = 0;
+	s = paccept(passive_fd, set);
+	if (s == -1) {
+		last_errno = errno;
+		goto accept_failed;
 	}
 
+	int fd = s;
+	s = set_nonblocking(fd);
+	if (s == -1) {
+		last_errno = errno;
+
+		shutdown(fd, SHUT_RDWR);
+		EINTR_RETRY(close(fd));	// TODO error is ignored
+		goto accept_failed;
+	}
+
+	A->fd = fd;
+	A->eof = 0;
+	ret = 0;
+
+accept_failed:
 	shutdown(passive_fd, SHUT_RDWR);
 	EINTR_RETRY(close(passive_fd));	// TODO error is ignored
 
@@ -169,12 +316,14 @@ listening_failed:
 
 /*
  * Establish a connection to host:serv defined in the endpoint B.
+ * During the connection, set the signal mask set atomically before blocking.
  *
  * Save the file descriptor of the peer socket if it succeeds into B
  * and return 0.
  * On error, return -1 and errno is set appropriately.
  * */
-int establish_connection(struct endpoint *B, size_t skt_buf_sizes[2]) {
+int establish_connection(struct endpoint *B, size_t skt_buf_sizes[2],
+		sigset_t *set) {
 	int ret = -1;
 
 	int fd;
@@ -194,19 +343,16 @@ int establish_connection(struct endpoint *B, size_t skt_buf_sizes[2]) {
 			continue;
 		}
 
-		if (set_socket_buffer_sizes(fd, skt_buf_sizes) != 0) {
-			last_errno = errno;
-			continue;
-		}
-
-		EINTR_RETRY(connect(fd, rp->ai_addr, rp->ai_addrlen));
-
-		if (s != -1)
+		if (set_socket_buffer_sizes(fd, skt_buf_sizes) != -1
+				&& set_nonblocking(fd) != -1
+				&& pconnect(fd, rp, set) != -1 ) {
 			break;	/* good */
-
-		/* bad */
-		last_errno = errno;
-		EINTR_RETRY(close(fd));
+		}
+		else {
+			/* bad */
+			last_errno = errno;
+			EINTR_RETRY(close(fd));
+		}
 	}
 
 	freeaddrinfo(result);
@@ -223,13 +369,6 @@ resolv_failed:
 
 }
 
-int set_nonblocking(struct endpoint *p) {
-	int flags = fcntl(p->fd, F_GETFL);
-	if (flags == -1)
-		return -1;
-
-	return fcntl(p->fd, F_SETFL, flags | O_NONBLOCK);
-}
 
 void partial_shutdown(struct endpoint *p, int direction) {
 	shutdown(p->fd, direction);

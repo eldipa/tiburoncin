@@ -35,6 +35,18 @@ int passthrough(struct endpoint *ep_producer, struct endpoint *ep_consumer,
 		EINTR_RETRY(read(producer, &b->buf[b->head], circular_buffer_get_free(b)));
 
 		if (s < 0) {
+			/*
+			 * Despite that we use some sort of select/poll multiplexer
+			 * the read/write it could block.
+			 *
+			 * For example, if the fd is a socket and it receives data,
+			 * that would mark it "ready for reading" but if the packet
+			 * received is corrupted, it will be discarded and the read call will
+			 * block because there is not more data.
+			 *
+			 * To workaround this, the fd must have the O_NONBLOCK flag.
+			 * See select(2).
+			 * */
 			if (errno == EAGAIN || errno == EWOULDBLOCK) {
 				FD_CLR(producer, rfds);
 				goto read_would_block;
@@ -233,14 +245,14 @@ int main(int argc, char *argv[]) {
 
 	/* us <--> B */
 	printf("Connecting to B %s:%s...\n", B.host, B.serv);
-	if (establish_connection(&B, skt_buf_sizes) != 0) {
+	if (establish_connection(&B, skt_buf_sizes, &sigs_allowed) != 0) {
 		perror("Establish a connection to the destination failed");
 		goto establish_conn_failed;
 	}
 
 	/* A <--> us */
 	printf("Waiting for a connection from A %s:%s...\n", A.host, A.serv);
-	if (wait_for_connection(&A, skt_buf_sizes) != 0) {
+	if (wait_for_connection(&A, skt_buf_sizes, &sigs_allowed) != 0) {
 		perror("Wait for connection from the source failed");
 		goto wait_conn_failed;
 	}
@@ -269,22 +281,6 @@ int main(int argc, char *argv[]) {
 	if (hexdump_init(&hd_BtoA, "B", "A", colors[1], out_filenames[1]) != 0) {
 		perror("Hexdump B->A allocation failed");
 		goto hd_B_to_A_failed;
-	}
-
-	/* Despite that we use some sort of select/poll multiplexer
-	 * the read/write it could block.
-	 *
-	 * For example, if the fd is a socket and it receives data,
-	 * that would mark it "ready for reading" but if the packet
-	 * received is corrupted, it will be discarded and the read call will
-	 * block because there is not more data.
-	 *
-	 * To workaround this, the fd must have the O_NONBLOCK flag.
-	 * See select(2).
-	 * */
-	if (set_nonblocking(&A) != 0 || set_nonblocking(&B) != 0) {
-		perror("Set nonblocking mode failed");
-		goto set_nonblocking_failed;
 	}
 
 	int nfds = MAX(A.fd, B.fd) + 1;
@@ -334,7 +330,6 @@ int main(int argc, char *argv[]) {
 	ret = 0;
 
 passthrough_failed:
-set_nonblocking_failed:
 	hexdump_destroy(&hd_BtoA);
 
 hd_B_to_A_failed:
