@@ -350,5 +350,11 @@ wait_conn_failed:
 
 establish_conn_failed:
 setup_signal_failed:
+
+	if (!colorless)
+		printf("%s", "\x1b[0m"); /* reset */
+	if (interrupted)
+		printf("\nUser cancelled.\n");
+
 	return interrupted?  128 + interrupted : ret;
 }
