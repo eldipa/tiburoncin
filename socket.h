@@ -44,6 +44,12 @@ int wait_for_connection(struct endpoint *A, size_t skt_buf_sizes[2],
  * Save the file descriptor of the peer socket if it succeeds into B
  * and return 0.
  * On error, return -1 and errno is set appropriately.
+ *
+ * Note: the function will try to connect to the endpoint several times
+ * (CONNECT_TRIES == 3 by default), sleeping for CONNECT_WAIT_TRY_SECS == 1
+ * seconds between each try, only then it will give up.
+ *
+ * The signal mask *will not be changed* during this wait.
  * */
 int establish_connection(struct endpoint *B, size_t skt_buf_sizes[2],
 		sigset_t *set);

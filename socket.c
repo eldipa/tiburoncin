@@ -5,6 +5,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <time.h>
 
 #include <sys/select.h>
 
@@ -17,6 +18,8 @@
 #include "signal.h"
 
 #define DEFAULT_BACKLOG 1
+#define CONNECT_TRIES 3
+#define CONNECT_WAIT_TRY_SECS 1
 
 /*
  * Given a hostname and servicename in the endpoint p,
@@ -314,14 +317,6 @@ listening_failed:
 	return ret;
 }
 
-/*
- * Establish a connection to host:serv defined in the endpoint B.
- * During the connection, set the signal mask set atomically before blocking.
- *
- * Save the file descriptor of the peer socket if it succeeds into B
- * and return 0.
- * On error, return -1 and errno is set appropriately.
- * */
 int establish_connection(struct endpoint *B, size_t skt_buf_sizes[2],
 		sigset_t *set) {
 	int ret = -1;
@@ -330,33 +325,45 @@ int establish_connection(struct endpoint *B, size_t skt_buf_sizes[2],
 	int s;
 	int last_errno = 0;
 	struct addrinfo *result, *rp;
+	int remain = CONNECT_TRIES;
 
-	s = resolv(B, &result);
-	if (s != 0)
-		goto resolv_failed;
-
-	for (rp = result; rp != NULL; rp = rp->ai_next) {
-		fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-
-		if (fd == -1) {
+	do {
+		s = resolv(B, &result);
+		if (s != 0) {
 			last_errno = errno;
-			continue;
+			goto resolv_failed;
 		}
 
-		if (set_socket_buffer_sizes(fd, skt_buf_sizes) != -1
-				&& set_nonblocking(fd) != -1
-				&& pconnect(fd, rp, set) != -1 ) {
-			break;	/* good */
-		}
-		else {
-			/* bad */
-			last_errno = errno;
-			EINTR_RETRY(close(fd));
-		}
-	}
+		for (rp = result; rp != NULL; rp = rp->ai_next) {
+			fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
 
-	freeaddrinfo(result);
-	errno = last_errno;
+			if (fd == -1) {
+				last_errno = errno;
+				continue;
+			}
+
+			if (set_socket_buffer_sizes(fd, skt_buf_sizes) != -1
+					&& set_nonblocking(fd) != -1
+					&& pconnect(fd, rp, set) != -1 ) {
+				break;	/* good */
+			}
+			else {
+				/* bad */
+				last_errno = errno;
+				EINTR_RETRY(close(fd));
+			}
+		}
+
+		freeaddrinfo(result);
+		if (rp == NULL && --remain > 0) {
+			struct timespec t = {
+				.tv_sec  = CONNECT_WAIT_TRY_SECS,
+				.tv_nsec = 0
+			};
+			EINTR_RETRY(nanosleep(&t, &t)); /* ignore any error */
+		}
+
+	} while (rp == NULL && remain > 0);
 
 	if (rp != NULL) {
 		B->fd = fd;
@@ -365,6 +372,7 @@ int establish_connection(struct endpoint *B, size_t skt_buf_sizes[2],
 	}
 
 resolv_failed:
+	errno = last_errno;
 	return ret;
 
 }
