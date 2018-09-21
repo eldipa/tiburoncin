@@ -83,6 +83,6 @@ int setup_signal_handlers();
  *
  * Note: on error, the value of *set is undefined.
  * */
-int initialize_allowed_sigset(sigset_t *set);
+int initialize_interrupt_sigset(sigset_t *set);
 
 #endif

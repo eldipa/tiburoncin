@@ -215,7 +215,7 @@ int main(int argc, char *argv[]) {
 	const char *out_filenames[2] = {0, 0};
 	const char *colors[2] = {"\x1b[91m", "\x1b[94m"};
 	int colorless = 0;
-	sigset_t sigs_allowed;
+	sigset_t intset;
 
 	if (parse_cmd_line(argc, argv, &A, &B, buf_sizes, skt_buf_sizes,
 				out_filenames, &colorless)) {
@@ -224,18 +224,19 @@ int main(int argc, char *argv[]) {
 		return ret;
 	}
 
-	if (block_all_signals() != 0) {
-		perror("Block all signals failed");
-		goto setup_signal_failed;
-	}
-
-	if (setup_signal_handlers() != 0) {
-		perror("Setup signal handlers failed");
-		goto setup_signal_failed;
-	}
-
-	if (initialize_allowed_sigset(&sigs_allowed) != 0) {
-		perror("Initialize allowed signal set failed");
+	/*
+	 * Block all the signals and setup some handlers for SIGINT and
+	 * SIGTERM.
+	 * Those are blocked but they will be unblock if the intset signal
+	 * set mask is used.
+	 *
+	 * See block_all_signals and setup_signal_handlers to see exactly which
+	 * signals are blocked and handled.
+	 * */
+	if (block_all_signals() != 0
+			|| setup_signal_handlers() != 0
+			|| initialize_interrupt_sigset(&intset) != 0) {
+		perror("Setup signal handling failed");
 		goto setup_signal_failed;
 	}
 
@@ -245,14 +246,14 @@ int main(int argc, char *argv[]) {
 
 	/* us <--> B */
 	printf("Connecting to B %s:%s...\n", B.host, B.serv);
-	if (establish_connection(&B, skt_buf_sizes, &sigs_allowed) != 0) {
+	if (establish_connection(&B, skt_buf_sizes, &intset) != 0) {
 		perror("Establish a connection to the destination failed");
 		goto establish_conn_failed;
 	}
 
 	/* A <--> us */
 	printf("Waiting for a connection from A %s:%s...\n", A.host, A.serv);
-	if (wait_for_connection(&A, skt_buf_sizes, &sigs_allowed) != 0) {
+	if (wait_for_connection(&A, skt_buf_sizes, &intset) != 0) {
 		perror("Wait for connection from the source failed");
 		goto wait_conn_failed;
 	}
@@ -309,7 +310,7 @@ int main(int argc, char *argv[]) {
 				  A to B nor B to A. */
 
 
-		EINTR_RETRY(pselect(nfds, &rfds, &wfds, NULL, NULL, &sigs_allowed));
+		EINTR_RETRY(pselect(nfds, &rfds, &wfds, NULL, NULL, &intset));
 
 		if (s == -1) {
 			perror("select call failed");

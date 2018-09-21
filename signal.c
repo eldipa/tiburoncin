@@ -60,7 +60,7 @@ int setup_signal_handlers() {
 	return 0;
 }
 
-int initialize_allowed_sigset(sigset_t *set) {
+int initialize_interrupt_sigset(sigset_t *set) {
 	if (initialize_block_all_sigset(set) != -1 \
 			    && sigdelset(set, SIGINT) != -1 \
 			    && sigdelset(set, SIGTERM) != -1 \
