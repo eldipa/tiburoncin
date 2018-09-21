@@ -383,7 +383,6 @@ int is_write_eof(struct endpoint *p) {
 	return p->eof & 2;
 }
 
-#include <syslog.h>
 void shutdown_and_close(struct endpoint *p) {
 	int s;
 	if (!is_read_eof(p))
