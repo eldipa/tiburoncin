@@ -63,6 +63,7 @@ int block_all_signals();
 /*
  * Setup the signal handlers:
  *	- SIGINT (Interrupt / Ctrl-C): set interrupted variable to nonzero
+ *	- SIGQUIT (Quit from keyboard): set interrupted variable to nonzero
  *	- SIGTERM (Termination): set interrupted variable to nonzero
  *	- SIGPIPE (Broken Pipe): ignore the signal
  *
@@ -74,7 +75,8 @@ int block_all_signals();
 int setup_signal_handlers();
 
 /*
- * Initialize a signal set (mask) to unblock SIGINT, SIGTERM and SIGPIPE.
+ * Initialize a signal set (mask) to unblock SIGINT, SIGQUIT,
+ * SIGTERM and SIGPIPE.
  *
  * It is the mask generated from the block_all_signals() set minus the
  * signals with handlers defined by setup_signal_handlers().
