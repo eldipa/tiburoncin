@@ -45,7 +45,8 @@ class netcat:
         self.skt.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, self.rcv_buf)
 
     def send(self, msg):
-        msg = bytes(msg, 'ascii')
+        if not isinstance(msg, bytes):
+            msg = bytes(msg, 'ascii')
         self.skt.sendall(msg)
 
     def consume(self, n):

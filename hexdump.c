@@ -38,7 +38,7 @@ size_t print_half_hex(struct hexdump *hd, size_t begin, int half,
 			printf("   ");
 		}
 		else {
-			printf("%02x ", buf[i]);
+			printf("%02hhx ", buf[i]);
 			++i;
 
 		}
@@ -90,7 +90,7 @@ size_t print_full_hex(struct hexdump *hd, size_t start_line_offset,
 void hexdump_print_raw_hex(struct hexdump *hd, const char *buf, unsigned int sz) {
 	if (hd->out_file) {
 		for (size_t i = 0; i < sz; ++i) {
-			fprintf(hd->out_file, "%02x", buf[i]);
+			fprintf(hd->out_file, "%02hhx", buf[i]);
 
 			if ((hd->offset + i) % 16 == 15)
 				fprintf(hd->out_file, "\n");
