@@ -7,6 +7,9 @@ Pick two random ports
 >>> pair_ports()                            # byexample: +fail-fast
 (<port-a>, <port-b>)
 
+>>> pair_ports()                            # byexample: +fail-fast
+(<port-c>, <port-d>)
+
 Alias
 $ alias tiburoncin=../tiburoncin
 
@@ -101,6 +104,66 @@ $ xxd -p -c 16 -r BtoA.dump | hexdump -C
 00000000  68 69 21                                          |hi!|
 00000003
 
+```
+
+## Binary
+
+What happen if we send binary instead of letters?
+
+```python
+>>> B = netcat(listen_on = <port-d>)        # byexample: +paste
+```
+
+```shell
+$ tiburoncin -A 127.0.0.1:<port-c> -B 127.0.0.1:<port-d> -c -o    # byexample: +paste +stop-on-silence +timeout=1
+Connecting to B 127.0.0.1:<port-d>...
+Waiting for a connection from A 127.0.0.1:<port-c>...
+```
+
+```python
+>>> A = netcat(connect_to = <port-c>)       # byexample: +paste
+```
+
+<!--
+Accept the connection and close the circuit
+>>> B.accept()  # byexample: +fail-fast
+-->
+
+Now let's send some data back and forward in binary. Use lower
+and higher bytes to stress the *signess*:
+
+```python
+>>> A.send(b'\x01\x02')
+>>> B.send(b'\xff\xfe')
+
+>>> A.shutdown()                            # byexample: -skip
+>>> B.shutdown()                            # byexample: -skip
+```
+
+```shell
+$ fg                                        # byexample: +stop-on-silence +timeout=1
+<...>tiburoncin <...>
+Allocating buffers: 2048 and 2048 bytes...
+A -> B sent 2 bytes
+00000000  01 02                                             |..              |
+B is 2 bytes behind
+B -> A sent 2 bytes
+00000000  ff fe                                             |..              |
+A is 2 bytes behind
+A -> B flow shutdown
+B is in sync
+B -> A flow shutdown
+A is in sync
+```
+
+```shell
+$ xxd -p -c 16 -r AtoB.dump | hexdump -C
+00000000  01 02                                             |..|
+00000002
+
+$ xxd -p -c 16 -r BtoA.dump | hexdump -C
+00000000  ff fe                                             |..|
+00000002
 ```
 
 <!--
