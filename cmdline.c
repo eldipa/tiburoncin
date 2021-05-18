@@ -81,9 +81,31 @@ int parse_buffer_sizes(char *sz_str, size_t buf_sizes[2]) {
 	return 0;
 }
 
+static
+int parse_output_filenames(char *prefix, char *out_filenames[]) {
+	int prefix_len = strlen(prefix);
+
+	int atob_len = prefix_len + strlen(DEFAULT_A_TO_B_DUMPFILENAME);
+	int btoa_len = prefix_len + strlen(DEFAULT_B_TO_A_DUMPFILENAME);
+
+	out_filenames[0] = malloc(atob_len + 1);
+	out_filenames[0][atob_len] = '\0';
+
+	out_filenames[1] = malloc(btoa_len + 1);
+	out_filenames[1][btoa_len] = '\0';
+
+	if (snprintf(out_filenames[0], atob_len, "%s%s", prefix, DEFAULT_A_TO_B_DUMPFILENAME) < 0)
+		return -1;
+
+	if (snprintf(out_filenames[1], btoa_len, "%s%s", prefix, DEFAULT_B_TO_A_DUMPFILENAME) < 0)
+		return -1;
+
+	return 0;
+}
+
 int parse_cmd_line(int argc, char *argv[], struct endpoint *A,
 		struct endpoint *B, size_t buf_sizes[2],
-		size_t skt_buf_sizes[2], const char *out_filenames[2],
+		size_t skt_buf_sizes[2], char *out_filenames[2],
 		int *colorless) {
 	int ret = -1;
 	int opt;
@@ -95,7 +117,7 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *A,
 	out_filenames[0] = out_filenames[1] = 0;
 	*colorless = 0;
 
-	while ((opt = getopt(argc, argv, "A:B:b:z:och")) != -1) {
+	while ((opt = getopt(argc, argv, "A:B:b:z:o:ch")) != -1) {
 		switch (opt) {
 			case 'A':
 				/* A configuration */
@@ -127,8 +149,10 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *A,
 
 			case 'o':
 				/* save capture onto the output files */
-				out_filenames[0] = DEFAULT_A_TO_B_DUMPFILENAME;
-				out_filenames[1] = DEFAULT_B_TO_A_DUMPFILENAME;
+				if (parse_output_filenames(optarg, out_filenames) != 0) {
+					fprintf(stderr, "Invalid output filenames.\n");
+					return ret;
+				}
 				break;
 
 			case 'c':
@@ -174,7 +198,7 @@ void what(char *argv[]) {
 
 void usage(char *argv[]) {
 	printf
-		("%s -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o] [-c]\n"
+		("%s -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o [prefix]] [-c]\n"
 		 " where <addr> can be of the form:\n"
 		 "  - host:serv\n"
 		 "  - :serv\n"

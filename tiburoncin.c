@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
 	struct endpoint A, B;
 	size_t buf_sizes[2] = {0, 0};
 	size_t skt_buf_sizes[2] = {0, 0};
-	const char *out_filenames[2] = {0, 0};
+	char *out_filenames[2] = {0, 0};
 	const char *colors[2] = {"\x1b[91m", "\x1b[94m"};
 	int colorless = 0;
 	sigset_t intset;
@@ -355,6 +355,13 @@ setup_signal_failed:
 		printf("%s", "\x1b[0m"); /* reset */
 	if (interrupted)
 		printf("\nUser cancelled.\n");
+
+	if (out_filenames[0]) {
+		free(out_filenames[0]);
+	}
+	if (out_filenames[1]) {
+		free(out_filenames[1]);
+	}
 
 	return interrupted?  128 + interrupted : ret;
 }
