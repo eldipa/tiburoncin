@@ -106,6 +106,8 @@ Version: 2.1.0
  in both cases a raw hexdump is saved which can be recovered later
  running 'xxd -p -c 16 -r <raw hexdump file>'. See man xxd(1)
 ~
+ -f <prefix> adds a prefix to both the dump file names
+~
  -c disable the color in the output (colorless)
 
 ```

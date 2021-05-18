@@ -214,7 +214,7 @@ void what(char *argv[]) {
 
 void usage(char *argv[]) {
 	printf
-		("%s -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o] [-c] [-f <prefix>]\n"
+		("%s -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o] [-f <prefix>] [-c]\n"
 		 " where <addr> can be of the form:\n"
 		 "  - host:serv\n"
 		 "  - :serv\n"
@@ -242,6 +242,7 @@ void usage(char *argv[]) {
 		 " running 'xxd -p -c 16 -r <raw hexdump file>'. See man xxd(1)\n"
 		 " \n"
 		 " -f <prefix> adds a prefix to the dump files\n"
+		 " \n"
 		 " -c disable the color in the output (colorless)\n",
 		argv[0], DEFAULT_HOST, DEFAULT_BUF_SIZE,
 		DEFAULT_A_TO_B_DUMPFILENAME, DEFAULT_B_TO_A_DUMPFILENAME);
