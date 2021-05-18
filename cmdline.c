@@ -83,6 +83,14 @@ int parse_buffer_sizes(char *sz_str, size_t buf_sizes[2]) {
 
 static
 int parse_output_filenames(char *prefix, char *out_filenames[]) {
+	if (out_filenames[0] != NULL) {
+		free(out_filenames[0]);
+	}
+
+	if (out_filenames[1] != NULL) {
+		free(out_filenames[1]);
+	}
+
 	int prefix_len = strlen(prefix);
 
 	int atob_len = prefix_len + strlen(DEFAULT_A_TO_B_DUMPFILENAME);
@@ -94,10 +102,10 @@ int parse_output_filenames(char *prefix, char *out_filenames[]) {
 	out_filenames[1] = malloc(btoa_len + 1);
 	out_filenames[1][btoa_len] = '\0';
 
-	if (snprintf(out_filenames[0], atob_len, "%s%s", prefix, DEFAULT_A_TO_B_DUMPFILENAME) < 0)
+	if (snprintf(out_filenames[0], atob_len + 1, "%s%s", prefix, DEFAULT_A_TO_B_DUMPFILENAME) < 0)
 		return -1;
 
-	if (snprintf(out_filenames[1], btoa_len, "%s%s", prefix, DEFAULT_B_TO_A_DUMPFILENAME) < 0)
+	if (snprintf(out_filenames[1], btoa_len + 1, "%s%s", prefix, DEFAULT_B_TO_A_DUMPFILENAME) < 0)
 		return -1;
 
 	return 0;
@@ -117,7 +125,7 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *A,
 	out_filenames[0] = out_filenames[1] = 0;
 	*colorless = 0;
 
-	while ((opt = getopt(argc, argv, "A:B:b:z:o:ch")) != -1) {
+	while ((opt = getopt(argc, argv, "A:B:b:z:ochf:")) != -1) {
 		switch (opt) {
 			case 'A':
 				/* A configuration */
@@ -149,8 +157,16 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *A,
 
 			case 'o':
 				/* save capture onto the output files */
+				if (parse_output_filenames("", out_filenames) != 0) {
+					fprintf(stderr, "Invalid output filenames prefix.\n");
+					return ret;
+				}
+				break;
+
+			case 'f':
+				/* add output files prefix */
 				if (parse_output_filenames(optarg, out_filenames) != 0) {
-					fprintf(stderr, "Invalid output filenames.\n");
+					fprintf(stderr, "Invalid output filenames prefix.\n");
 					return ret;
 				}
 				break;
@@ -198,7 +214,7 @@ void what(char *argv[]) {
 
 void usage(char *argv[]) {
 	printf
-		("%s -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o [prefix]] [-c]\n"
+		("%s -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o] [-c] [-f <prefix>]\n"
 		 " where <addr> can be of the form:\n"
 		 "  - host:serv\n"
 		 "  - :serv\n"
@@ -225,6 +241,7 @@ void usage(char *argv[]) {
 		 " in both cases a raw hexdump is saved which can be recovered later\n"
 		 " running 'xxd -p -c 16 -r <raw hexdump file>'. See man xxd(1)\n"
 		 " \n"
+		 " -f <prefix> adds a prefix to the dump files\n"
 		 " -c disable the color in the output (colorless)\n",
 		argv[0], DEFAULT_HOST, DEFAULT_BUF_SIZE,
 		DEFAULT_A_TO_B_DUMPFILENAME, DEFAULT_B_TO_A_DUMPFILENAME);
