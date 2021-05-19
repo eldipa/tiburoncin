@@ -67,7 +67,7 @@ B is in sync
 ### Help
 
 ```shell
-$ ./tiburoncin -h                             # byexample: -tag +rm=~ +norm-ws
+$ ./tiburoncin -h                             # byexample: -tags +rm=~ +norm-ws
 tiburoncin
 ==========
 ~
@@ -77,9 +77,9 @@ Mostly to be used for students wanting to know what data is flowing in a TCP cha
 Author: Martin Di Paola
 URL: https://github.com/eldipa/tiburoncin
 License: GPLv3
-Version: 2.1.0
+Version: 2.2.0
 ~
-./tiburoncin -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o] [-c]
+./tiburoncin -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o | -f <prefix>] [-c]
  where <addr> can be of the form:
   - host:serv
   - :serv
