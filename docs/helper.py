@@ -32,6 +32,9 @@ class netcat:
         else:
             self.skt.connect(('127.0.0.1', int(connect_to)))
 
+        self._data_sent = []
+        self._data_recv = []
+
     def accept(self):
         s = self.skt.accept()
         self.skt.shutdown(socket.SHUT_RDWR)
@@ -47,11 +50,15 @@ class netcat:
     def send(self, msg):
         if not isinstance(msg, bytes):
             msg = bytes(msg, 'ascii')
+
+        self._data_sent.append(msg)
         self.skt.sendall(msg)
 
     def consume(self, n):
         while n > 0:
-            s = len(self.skt.recv(n))
+            msg = self.skt.recv(n)
+            self._data_recv.append(msg)
+            s = len(msg)
             if s > 0:
                 n -= s
             else:
@@ -60,7 +67,17 @@ class netcat:
         return None # yes, none
 
     def shutdown(self, how=None):
-        if how == None or how == socket.SHUT_RDWR:
+        how = {
+                None: socket.SHUT_RDWR,
+                "both-channels": socket.SHUT_RDWR,
+                "write-channel": socket.SHUT_WR,
+                "read-channel": socket.SHUT_RD,
+                socket.SHUT_RDWR: socket.SHUT_RDWR,
+                socket.SHUT_WR: socket.SHUT_WR,
+                socket.SHUT_RD: socket.SHUT_RD
+                }[how]
+
+        if how == socket.SHUT_RDWR:
             for f in self.flows:
                 self.skt.shutdown(f)
 
@@ -72,3 +89,25 @@ class netcat:
         if not self.flows:
             self.skt.close()
 
+
+def check_transfer(src, dst):
+    sent = b''.join(src._data_sent)
+    recv = b''.join(dst._data_recv)
+
+    if sent == recv:
+        print("%d bytes transferred correctly." % len(sent))
+        return
+
+    if len(sent) < len(recv):
+        d = len(recv) - len(sent)
+        print("%d bytes were unexpectedly received!!" % d)
+        return
+
+    if len(sent) > len(recv):
+        head = sent[:len(recv)]
+        if head == recv:
+            print("%d bytes transferred correctly." % len(head))
+            print("subsequent %d bytes were sent but not received (lost)." % (len(sent) - len(head)))
+            return
+
+    print("mismatch!!")
