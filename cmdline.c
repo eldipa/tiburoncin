@@ -81,9 +81,50 @@ int parse_buffer_sizes(char *sz_str, size_t buf_sizes[2]) {
 	return 0;
 }
 
+static
+int parse_output_filenames(char *prefix, char *out_filenames[]) {
+	int prefix_len = strlen(prefix);
+
+	/* the size of a literal string is the length of the string plus one, because of the '\0' */
+	int atob_size = prefix_len + sizeof(DEFAULT_A_TO_B_DUMPFILENAME);
+	int btoa_size = prefix_len + sizeof(DEFAULT_B_TO_A_DUMPFILENAME);
+
+	out_filenames[0] = malloc(atob_size);
+	out_filenames[1] = malloc(btoa_size);
+
+	/* snprintf receives the size of the destination buffer (including the '\0' slot), but it
+	 * returns the lenght of the resulting string (excluding the '\0' slot) */
+	if (snprintf(out_filenames[0], atob_size, "%s%s", prefix, DEFAULT_A_TO_B_DUMPFILENAME) != atob_size - 1)
+		return -1;
+
+	if (snprintf(out_filenames[1], btoa_size, "%s%s", prefix, DEFAULT_B_TO_A_DUMPFILENAME) != btoa_size - 1)
+		return -1;
+
+	return 0;
+}
+
+static
+int save_default_output_filenames(char *out_filenames[]) {
+	out_filenames[0] = malloc(sizeof(DEFAULT_A_TO_B_DUMPFILENAME));
+	if (out_filenames[0] == NULL) {
+		return -1;
+	}
+
+	out_filenames[1] = malloc(sizeof(DEFAULT_B_TO_A_DUMPFILENAME));
+	if (out_filenames[1] == NULL) {
+		free(out_filenames[0]);
+		return -1;
+	}
+
+	/* memcpy doesn't fail */
+	memcpy(out_filenames[0], DEFAULT_A_TO_B_DUMPFILENAME, sizeof(DEFAULT_A_TO_B_DUMPFILENAME));
+	memcpy(out_filenames[1], DEFAULT_B_TO_A_DUMPFILENAME, sizeof(DEFAULT_B_TO_A_DUMPFILENAME));
+	return 0;
+}
+
 int parse_cmd_line(int argc, char *argv[], struct endpoint *A,
 		struct endpoint *B, size_t buf_sizes[2],
-		size_t skt_buf_sizes[2], const char *out_filenames[2],
+		size_t skt_buf_sizes[2], char *out_filenames[2],
 		int *colorless) {
 	int ret = -1;
 	int opt;
@@ -95,7 +136,7 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *A,
 	out_filenames[0] = out_filenames[1] = 0;
 	*colorless = 0;
 
-	while ((opt = getopt(argc, argv, "A:B:b:z:och")) != -1) {
+	while ((opt = getopt(argc, argv, "A:B:b:z:ochf:")) != -1) {
 		switch (opt) {
 			case 'A':
 				/* A configuration */
@@ -127,8 +168,28 @@ int parse_cmd_line(int argc, char *argv[], struct endpoint *A,
 
 			case 'o':
 				/* save capture onto the output files */
-				out_filenames[0] = DEFAULT_A_TO_B_DUMPFILENAME;
-				out_filenames[1] = DEFAULT_B_TO_A_DUMPFILENAME;
+				opt_found |= 8;
+				if (opt_found & 4) {
+					fprintf(stderr, "Options -o and -f are incompatible.\n");
+					return ret;
+				}
+				if (save_default_output_filenames(out_filenames)) {
+					fprintf(stderr, "Error while saving default output filenames.\n");
+					return ret;
+				}
+				break;
+
+			case 'f':
+				/* add output files prefix */
+				opt_found |= 4;
+				if (opt_found & 8) {
+					fprintf(stderr, "Options -o and -f are incompatible.\n");
+					return ret;
+				}
+				if (parse_output_filenames(optarg, out_filenames) != 0) {
+					fprintf(stderr, "Invalid output filenames prefix.\n");
+					return ret;
+				}
 				break;
 
 			case 'c':
@@ -174,7 +235,7 @@ void what(char *argv[]) {
 
 void usage(char *argv[]) {
 	printf
-		("%s -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o] [-c]\n"
+		("%s -A <addr> -B <addr> [-b <bsz>] [-z <bsz>] [-o | -f <prefix>] [-c]\n"
 		 " where <addr> can be of the form:\n"
 		 "  - host:serv\n"
 		 "  - :serv\n"
@@ -200,6 +261,10 @@ void usage(char *argv[]) {
 		 "  %s for the data received from B\n"
 		 " in both cases a raw hexdump is saved which can be recovered later\n"
 		 " running 'xxd -p -c 16 -r <raw hexdump file>'. See man xxd(1)\n"
+		 " This option is incompatible with -f option\n"
+		 " \n"
+		 " -f <prefix> same as -o, but it pre-concatenates the specified prefix\n"
+		 " This option is incompatible with -o option\n"
 		 " \n"
 		 " -c disable the color in the output (colorless)\n",
 		argv[0], DEFAULT_HOST, DEFAULT_BUF_SIZE,

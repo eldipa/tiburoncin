@@ -105,6 +105,10 @@ Version: 2.1.0
   BtoA.dump for the data received from B
  in both cases a raw hexdump is saved which can be recovered later
  running 'xxd -p -c 16 -r <raw hexdump file>'. See man xxd(1)
+ This option is incompatible with -f option
+~
+ -f <prefix> same as -o, but it pre-concatenates the specified prefix
+ This option is incompatible with -o option
 ~
  -c disable the color in the output (colorless)
 
