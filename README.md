@@ -1,7 +1,7 @@
 # tiburoncin
 
 Small man in the middle tool to inspect the traffic between two endpoints A and B.
-Mostly to be used for students wanting to know what data is flowing in a TCP channel.
+Mostly used by students wanting to know what data is flowing in a TCP channel.
 
 ## Usage
 
