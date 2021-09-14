@@ -4,6 +4,10 @@ compile:
 	gcc ${CODESTD_FLAGS} -O2 -o tiburoncin *.c
 	chmod u+x tiburoncin
 
+install:
+	chmod u+x tiburoncin
+	cp tiburoncin /usr/bin/
+
 test: compile
 	@make _run_test
 

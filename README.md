@@ -122,6 +122,13 @@ You will need ``make`` and ``gcc`` with support for ``c99``. Then just run:
 make compile                           # byexample: +skip
 ```
 
+That's all. You should find the binary `tiburocin` ready to use. If you
+want to install it (optional), you need to run:
+
+```shell
+sudo make install
+```
+
 ### Run the tests
 
 For this you will need [python](https://www.python.org/downloads/),
