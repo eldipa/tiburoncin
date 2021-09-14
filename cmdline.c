@@ -21,7 +21,7 @@
 #define TIBURONCIN_AUTHOR "Martin Di Paola"
 #define TIBURONCIN_URL "https://github.com/eldipa/tiburoncin"
 #define TIBURONCIN_LICENSE "GPLv3"
-#define TIBURONCIN_VERSION "2.2.0"
+#define TIBURONCIN_VERSION "2.2.1"
 
 extern char *optarg;
 
