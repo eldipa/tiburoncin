@@ -258,7 +258,7 @@ int main(int argc, char *argv[]) {
 		goto wait_conn_failed;
 	}
 
-	printf("Allocating buffers: %lu and %lu bytes...\n", buf_sizes[0],
+	printf("Allocating buffers: %zu and %zu bytes...\n", buf_sizes[0],
 			buf_sizes[1]);
 	struct circular_buffer_t buf_AtoB;
 	if (circular_buffer_init(&buf_AtoB, buf_sizes[0]) != 0) {
