@@ -28,7 +28,7 @@ _run_test: test-doc test-circular-buffer
 test-doc:
 	@hash byexample || if true; then echo "byexample is not installed, install it with 'pip install byexample', see https://byexamples.github.io/byexample/" ; exit 1; fi
 	( cd docs ; byexample -l python,shell *.md )
-	byexample -l shell README.md
+	byexample --diff ndiff -l shell README.md
 
 test-circular-buffer:
 	@hash byexample || if true; then echo "byexample is not installed, install it with 'pip install byexample', see https://byexamples.github.io/byexample/" ; exit 1; fi
