@@ -1,4 +1,4 @@
-CODESTD_FLAGS=-std=c99 -pedantic -Wall -Werror
+CODESTD_FLAGS=-std=c17 -pedantic -Wall -Werror
 
 compile:
 	gcc ${CODESTD_FLAGS} -O2 -o tiburoncin *.c
