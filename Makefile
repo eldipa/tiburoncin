@@ -1,12 +1,14 @@
 CODESTD_FLAGS=-std=c17 -pedantic -Wall -Werror
-
+PREFIX=/usr
+BINDIR=${PREFIX}/bin
 compile:
 	gcc ${CODESTD_FLAGS} -O2 -o tiburoncin *.c
 	chmod u+x tiburoncin
 
 install:
-	chmod u+x tiburoncin
-	cp tiburoncin /usr/bin/
+	mkdir -p $(DESTDIR)$(BINDIR)
+	cp tiburoncin ${DESTDIR}${BINDIR}
+	chmod u+x ${DESTDIR}${BINDIR}/tiburoncin
 
 test: compile
 	@make _run_test
